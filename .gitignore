@@ -1,6 +1,6 @@
 __pycache__/
 *.pyc
-expenses.db
 .pytest_cache/
 venv/
 .venv/
+expenses.db

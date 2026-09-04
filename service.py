@@ -1,15 +1,27 @@
 from datetime import date
+
 from database import get_connection, initialize_database
 
 
-def add_expense(amount, category, description="", expense_date=None):
-
+def add_expense(
+    amount,
+    category,
+    description="",
+    expense_date=None,
+):
     initialize_database()
+
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        raise ValueError("Amount must be a valid number.")
 
     if amount <= 0:
         raise ValueError("Amount must be greater than zero.")
 
-    if not category.strip():
+    category = category.strip()
+
+    if not category:
         raise ValueError("Category cannot be empty.")
 
     if expense_date is None:
@@ -28,9 +40,9 @@ def add_expense(amount, category, description="", expense_date=None):
         VALUES (?, ?, ?, ?)
         """,
         (
-            float(amount),
+            amount,
             category,
-            description,
+            description.strip(),
             expense_date,
         ),
     )
@@ -45,7 +57,6 @@ def add_expense(amount, category, description="", expense_date=None):
 
 
 def list_expenses():
-
     initialize_database()
 
     connection = get_connection()
@@ -64,7 +75,6 @@ def list_expenses():
 
 
 def get_monthly_summary(year, month):
-
     initialize_database()
 
     date_prefix = f"{year:04d}-{month:02d}%"
@@ -99,7 +109,6 @@ def get_monthly_summary(year, month):
 
 
 def delete_expense(expense_id):
-
     initialize_database()
 
     connection = get_connection()
