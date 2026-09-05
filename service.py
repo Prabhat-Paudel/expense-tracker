@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from database import get_connection, initialize_database
 
@@ -19,13 +19,18 @@ def add_expense(
     if amount <= 0:
         raise ValueError("Amount must be greater than zero.")
 
-    category = category.strip()
+    category = str(category).strip()
 
     if not category:
         raise ValueError("Category cannot be empty.")
 
     if expense_date is None:
         expense_date = date.today().isoformat()
+
+    try:
+        datetime.strptime(expense_date, "%Y-%m-%d")
+    except ValueError:
+        raise ValueError("Date must be in YYYY-MM-DD format.")
 
     connection = get_connection()
 
@@ -42,7 +47,7 @@ def add_expense(
         (
             amount,
             category,
-            description.strip(),
+            str(description).strip(),
             expense_date,
         ),
     )
@@ -106,6 +111,90 @@ def get_monthly_summary(year, month):
     connection.close()
 
     return total, [dict(row) for row in categories]
+
+
+def get_category_summary():
+    initialize_database()
+
+    connection = get_connection()
+
+    rows = connection.execute(
+        """
+        SELECT
+            category,
+            SUM(amount) AS total
+        FROM expenses
+        GROUP BY category
+        ORDER BY total DESC
+        """
+    ).fetchall()
+
+    connection.close()
+
+    return [dict(row) for row in rows]
+
+
+def get_monthly_trend(months=6):
+    initialize_database()
+
+    connection = get_connection()
+
+    rows = connection.execute(
+        """
+        SELECT
+            substr(expense_date, 1, 7) AS month,
+            COALESCE(SUM(amount), 0) AS total
+        FROM expenses
+        GROUP BY substr(expense_date, 1, 7)
+        ORDER BY month DESC
+        LIMIT ?
+        """,
+        (months,),
+    ).fetchall()
+
+    connection.close()
+
+    results = [dict(row) for row in rows]
+
+    results.reverse()
+
+    return results
+
+
+def get_average_expense():
+    initialize_database()
+
+    connection = get_connection()
+
+    result = connection.execute(
+        """
+        SELECT COALESCE(AVG(amount), 0)
+        FROM expenses
+        """
+    ).fetchone()[0]
+
+    connection.close()
+
+    return result
+
+
+def get_highest_expense():
+    initialize_database()
+
+    connection = get_connection()
+
+    row = connection.execute(
+        """
+        SELECT *
+        FROM expenses
+        ORDER BY amount DESC
+        LIMIT 1
+        """
+    ).fetchone()
+
+    connection.close()
+
+    return dict(row) if row else None
 
 
 def delete_expense(expense_id):

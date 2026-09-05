@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -9,147 +10,392 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Expense Tracker Dashboard</title>
+    <title>Expense Tracker | Dashboard</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
+
 </head>
 
 <body>
 
 <div class="app">
 
-    <!-- Sidebar -->
+    <!-- SIDEBAR -->
 
     <aside class="sidebar">
 
-        <div class="logo">
-            💰
-            <span>Expense Tracker</span>
+        <div class="brand">
+
+            <div class="brand-icon">
+                💰
+            </div>
+
+            <div>
+                <strong>Expense</strong>
+                <span>Tracker</span>
+            </div>
+
         </div>
 
-        <nav>
-            <a href="/" class="active">
-                🏠 Dashboard
+
+        <nav class="navigation">
+
+            <a
+                href="#dashboard"
+                class="nav-link active"
+            >
+                <span>⌂</span>
+                Dashboard
             </a>
 
-            <a href="#add-expense">
-                ➕ Add Expense
+            <a
+                href="#add-expense"
+                class="nav-link"
+            >
+                <span>＋</span>
+                Add Expense
             </a>
 
-            <a href="#expenses">
-                📋 Expenses
+            <a
+                href="#analytics"
+                class="nav-link"
+            >
+                <span>◔</span>
+                Analytics
             </a>
 
-            <a href="#summary">
-                📊 Summary
+            <a
+                href="#transactions"
+                class="nav-link"
+            >
+                <span>▤</span>
+                Transactions
             </a>
+
         </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="themeToggle"
+                class="theme-toggle"
+                type="button"
+            >
+                <span id="themeIcon">🌙</span>
+                <span>Dark Mode</span>
+            </button>
+
+        </div>
 
     </aside>
 
 
-    <!-- Main Content -->
+    <!-- MAIN -->
 
     <main class="main">
+
+        <!-- TOPBAR -->
 
         <header class="topbar">
 
             <div>
-                <h1>Dashboard</h1>
 
-                <p>
-                    Track and manage your expenses
+                <p class="eyebrow">
+                    PERSONAL FINANCE
                 </p>
+
+                <h1>
+                    Dashboard
+                </h1>
+
+                <p class="subtitle">
+                    Here's your financial overview.
+                </p>
+
             </div>
 
-            <div class="date-display">
-                📅 {{ today }}
+
+            <div class="topbar-right">
+
+                <div class="today">
+
+                    <span>Today</span>
+
+                    <strong>
+                        {{ today }}
+                    </strong>
+
+                </div>
+
             </div>
 
         </header>
 
 
-        <!-- Error -->
+        <!-- FLASH MESSAGES -->
 
-        {% if error %}
+        {% with messages = get_flashed_messages(
+            with_categories=true
+        ) %}
 
-        <div class="alert">
-            ⚠️ {{ error }}
-        </div>
+            {% if messages %}
 
-        {% endif %}
+                <div class="notifications">
+
+                    {% for category, message in messages %}
+
+                        <div
+                            class="notification {{ category }}"
+                        >
+
+                            <span>
+                                {% if category == "success" %}
+                                    ✓
+                                {% else %}
+                                    !
+                                {% endif %}
+                            </span>
+
+                            {{ message }}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
 
 
-        <!-- Statistics -->
+        <!-- STAT CARDS -->
 
-        <section class="stats">
+        <section
+            class="stats"
+            id="dashboard"
+        >
 
             <div class="stat-card">
 
-                <div class="stat-icon">
-                    💰
+                <div class="stat-header">
+
+                    <span class="stat-label">
+                        Total Spending
+                    </span>
+
+                    <span class="stat-icon blue">
+                        ₹
+                    </span>
+
                 </div>
 
-                <div>
-                    <p>Total Spending</p>
+                <h2>
+                    Rs. {{ "%.2f"|format(total) }}
+                </h2>
 
-                    <h2>
-                        Rs. {{ "%.2f"|format(total) }}
-                    </h2>
-                </div>
+                <p class="stat-description">
+                    All recorded expenses
+                </p>
 
             </div>
 
 
             <div class="stat-card">
 
-                <div class="stat-icon">
-                    📅
+                <div class="stat-header">
+
+                    <span class="stat-label">
+                        This Month
+                    </span>
+
+                    <span class="stat-icon purple">
+                        ◷
+                    </span>
+
                 </div>
 
-                <div>
-                    <p>This Month</p>
+                <h2>
+                    Rs.
+                    {{ "%.2f"|format(
+                        current_month_total
+                    ) }}
+                </h2>
 
-                    <h2>
-                        Rs. {{ "%.2f"|format(current_month_total) }}
-                    </h2>
-                </div>
+                <p class="stat-description">
+                    Current month spending
+                </p>
 
             </div>
 
 
             <div class="stat-card">
 
-                <div class="stat-icon">
-                    🧾
+                <div class="stat-header">
+
+                    <span class="stat-label">
+                        Average Expense
+                    </span>
+
+                    <span class="stat-icon green">
+                        ↗
+                    </span>
+
                 </div>
 
-                <div>
-                    <p>Total Transactions</p>
+                <h2>
+                    Rs.
+                    {{ "%.2f"|format(
+                        average_expense
+                    ) }}
+                </h2>
 
-                    <h2>
-                        {{ expenses|length }}
-                    </h2>
-                </div>
+                <p class="stat-description">
+                    Average per transaction
+                </p>
 
             </div>
 
 
             <div class="stat-card">
 
-                <div class="stat-icon">
-                    🏷️
+                <div class="stat-header">
+
+                    <span class="stat-label">
+                        Transactions
+                    </span>
+
+                    <span class="stat-icon orange">
+                        #
+                    </span>
+
                 </div>
 
-                <div>
-                    <p>Categories</p>
+                <h2>
+                    {{ expenses|length }}
+                </h2>
 
-                    <h2>
-                        {{ categories|length }}
-                    </h2>
+                <p class="stat-description">
+                    Total transactions
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- CHARTS -->
+
+        <section
+            class="charts"
+            id="analytics"
+        >
+
+            <div class="card chart-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Spending Overview
+                        </h2>
+
+                        <p>
+                            Your spending during the last 6 months
+                        </p>
+
+                    </div>
+
+                    <span class="chart-badge">
+                        6 Months
+                    </span>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas id="monthlyChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <div class="card chart-card category-chart-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Spending by Category
+                        </h2>
+
+                        <p>
+                            Where your money goes
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="donut-container">
+
+                    <canvas id="categoryChart"></canvas>
+
+                </div>
+
+
+                <div class="category-summary">
+
+                    {% for item in category_summary[:5] %}
+
+                        <div class="category-row">
+
+                            <span>
+                                {{ item.category }}
+                            </span>
+
+                            <strong>
+                                Rs.
+                                {{ "%.2f"|format(
+                                    item.total
+                                ) }}
+                            </strong>
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="empty">
+                            No category data yet.
+                        </p>
+
+                    {% endfor %}
+
                 </div>
 
             </div>
@@ -157,22 +403,30 @@
         </section>
 
 
-        <!-- Add Expense -->
+        <!-- QUICK ADD -->
 
         <section
-            class="card"
+            class="card add-card"
             id="add-expense"
         >
 
-            <div class="section-title">
+            <div class="card-header">
 
                 <div>
-                    <h2>Add New Expense</h2>
+
+                    <h2>
+                        Add New Expense
+                    </h2>
 
                     <p>
-                        Enter your expense information
+                        Record a new transaction
                     </p>
+
                 </div>
+
+                <span class="add-icon">
+                    ＋
+                </span>
 
             </div>
 
@@ -189,15 +443,21 @@
                         Amount
                     </label>
 
-                    <input
-                        type="number"
-                        id="amount"
-                        name="amount"
-                        step="0.01"
-                        min="0.01"
-                        placeholder="e.g. 500"
-                        required
-                    >
+                    <div class="input-wrapper">
+
+                        <span>Rs.</span>
+
+                        <input
+                            type="number"
+                            id="amount"
+                            name="amount"
+                            step="0.01"
+                            min="0.01"
+                            placeholder="0.00"
+                            required
+                        >
+
+                    </div>
 
                 </div>
 
@@ -282,7 +542,7 @@
                         type="text"
                         id="description"
                         name="description"
-                        placeholder="e.g. Lunch with friends"
+                        placeholder="What was this expense for?"
                     >
 
                 </div>
@@ -292,16 +552,16 @@
 
                     <button
                         type="reset"
-                        class="btn secondary"
+                        class="btn btn-secondary"
                     >
                         Clear
                     </button>
 
                     <button
                         type="submit"
-                        class="btn primary"
+                        class="btn btn-primary"
                     >
-                        ➕ Add Expense
+                        + Add Expense
                     </button>
 
                 </div>
@@ -311,21 +571,22 @@
         </section>
 
 
-        <!-- Monthly Summary -->
+        <!-- MONTHLY SUMMARY -->
 
-        <section
-            class="card"
-            id="summary"
-        >
+        <section class="card">
 
-            <div class="section-title">
+            <div class="card-header">
 
                 <div>
-                    <h2>Monthly Summary</h2>
+
+                    <h2>
+                        Monthly Summary
+                    </h2>
 
                     <p>
-                        View spending by category
+                        Analyze spending for a specific month
                     </p>
+
                 </div>
 
             </div>
@@ -347,7 +608,7 @@
                         type="number"
                         id="year"
                         name="year"
-                        value="{{ summary_year or today[:4] }}"
+                        value="{{ summary_year }}"
                         min="2000"
                         max="2100"
                         required
@@ -367,18 +628,33 @@
                         name="month"
                     >
 
-                        <option value="1">January</option>
-                        <option value="2">February</option>
-                        <option value="3">March</option>
-                        <option value="4">April</option>
-                        <option value="5">May</option>
-                        <option value="6">June</option>
-                        <option value="7">July</option>
-                        <option value="8">August</option>
-                        <option value="9">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
+                        {% for month_number in range(1, 13) %}
+
+                            <option
+                                value="{{ month_number }}"
+                                {% if summary_month == month_number %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{
+                                    [
+                                        "January",
+                                        "February",
+                                        "March",
+                                        "April",
+                                        "May",
+                                        "June",
+                                        "July",
+                                        "August",
+                                        "September",
+                                        "October",
+                                        "November",
+                                        "December"
+                                    ][month_number - 1]
+                                }}
+                            </option>
+
+                        {% endfor %}
 
                     </select>
 
@@ -387,224 +663,374 @@
 
                 <button
                     type="submit"
-                    class="btn primary summary-button"
+                    class="btn btn-primary summary-button"
                 >
-                    🔍 View Summary
+                    View Summary
                 </button>
 
             </form>
 
 
-            <div class="summary-result">
+            <div class="monthly-total">
 
-                <div class="summary-total">
+                <div>
 
-                    <span>Monthly Total</span>
+                    <span>
+                        Selected Month Total
+                    </span>
 
                     <strong>
-                        Rs. {{ "%.2f"|format(current_month_total) }}
+                        Rs.
+                        {{ "%.2f"|format(
+                            current_month_total
+                        ) }}
                     </strong>
 
                 </div>
 
+                <div class="monthly-icon">
+                    📊
+                </div>
 
-                {% if categories %}
+            </div>
 
-                <div class="category-list">
 
-                    {% for item in categories %}
+            {% if monthly_categories %}
 
-                    <div class="category-item">
+                <div class="summary-categories">
 
-                        <div>
-                            <strong>
-                                {{ item.category }}
-                            </strong>
+                    {% for item in monthly_categories %}
+
+                        <div class="summary-category">
+
+                            <div class="summary-category-top">
+
+                                <span>
+                                    {{ item.category }}
+                                </span>
+
+                                <strong>
+                                    Rs.
+                                    {{ "%.2f"|format(
+                                        item.total
+                                    ) }}
+                                </strong>
+
+                            </div>
 
                             <div class="progress">
+
                                 <span
-                                    style="width:
+                                    style="
+                                    width:
                                     {{
                                         (
                                             item.total /
-                                            current_month_total * 100
+                                            current_month_total *
+                                            100
                                         )
                                         if current_month_total > 0
                                         else 0
-                                    }}%"
+                                    }}%;
+                                    "
                                 ></span>
+
                             </div>
 
                         </div>
-
-                        <strong>
-                            Rs. {{ "%.2f"|format(item.total) }}
-                        </strong>
-
-                    </div>
 
                     {% endfor %}
 
                 </div>
 
-                {% else %}
-
-                <p class="empty">
-                    No expenses found for this month.
-                </p>
-
-                {% endif %}
-
-            </div>
-
-        </section>
-
-
-        <!-- Expenses Table -->
-
-        <section
-            class="card"
-            id="expenses"
-        >
-
-            <div class="section-title">
-
-                <div>
-                    <h2>Recent Expenses</h2>
-
-                    <p>
-                        All recorded expenses
-                    </p>
-                </div>
-
-                <span class="expense-count">
-                    {{ expenses|length }} records
-                </span>
-
-            </div>
-
-
-            {% if expenses %}
-
-            <div class="table-container">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>ID</th>
-                            <th>Date</th>
-                            <th>Category</th>
-                            <th>Description</th>
-                            <th>Amount</th>
-                            <th>Action</th>
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        {% for expense in expenses %}
-
-                        <tr>
-
-                            <td>
-                                #{{ expense.id }}
-                            </td>
-
-                            <td>
-                                {{ expense.expense_date }}
-                            </td>
-
-                            <td>
-
-                                <span class="category-badge">
-                                    {{ expense.category }}
-                                </span>
-
-                            </td>
-
-                            <td>
-                                {{ expense.description or "—" }}
-                            </td>
-
-                            <td class="amount">
-                                Rs.
-                                {{ "%.2f"|format(expense.amount) }}
-                            </td>
-
-                            <td>
-
-                                <form
-                                    action="{{
-                                        url_for(
-                                            'delete',
-                                            expense_id=expense.id
-                                        )
-                                    }}"
-                                    method="POST"
-                                    class="delete-form"
-                                >
-
-                                    <button
-                                        type="submit"
-                                        class="delete-btn"
-                                        onclick="
-                                        return confirm(
-                                            'Delete this expense?'
-                                        );
-                                        "
-                                    >
-                                        🗑️
-                                    </button>
-
-                                </form>
-
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
             {% else %}
 
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    🧾
+                <div class="empty-state small">
+                    No expenses found for this month.
                 </div>
-
-                <h3>No expenses yet</h3>
-
-                <p>
-                    Add your first expense using
-                    the form above.
-                </p>
-
-            </div>
 
             {% endif %}
 
         </section>
 
 
+        <!-- TRANSACTIONS -->
+
+        <section
+            class="card transactions-card"
+            id="transactions"
+        >
+
+            <div class="card-header transactions-header">
+
+                <div>
+
+                    <h2>
+                        Recent Transactions
+                    </h2>
+
+                    <p>
+                        Manage all your expenses
+                    </p>
+
+                </div>
+
+                <div class="transaction-tools">
+
+                    <input
+                        type="search"
+                        id="searchInput"
+                        placeholder="🔎 Search..."
+                    >
+
+                    <select id="categoryFilter">
+
+                        <option value="">
+                            All Categories
+                        </option>
+
+                        <option value="Food">
+                            Food
+                        </option>
+
+                        <option value="Transport">
+                            Transport
+                        </option>
+
+                        <option value="Shopping">
+                            Shopping
+                        </option>
+
+                        <option value="Entertainment">
+                            Entertainment
+                        </option>
+
+                        <option value="Bills">
+                            Bills
+                        </option>
+
+                        <option value="Education">
+                            Education
+                        </option>
+
+                        <option value="Health">
+                            Health
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            {% if expenses %}
+
+                <div class="table-wrapper">
+
+                    <table id="expenseTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Category
+                                </th>
+
+                                <th>
+                                    Description
+                                </th>
+
+                                <th>
+                                    Amount
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for expense in expenses %}
+
+                                <tr>
+
+                                    <td>
+                                        <span class="date-cell">
+                                            {{ expense.expense_date }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+
+                                        <span
+                                            class="category-badge
+                                            category-{{
+                                                expense.category|lower
+                                                |replace(' ', '-')
+                                            }}"
+                                        >
+                                            {{ expense.category }}
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        <div class="description-cell">
+
+                                            <strong>
+                                                {{
+                                                    expense.description
+                                                    or "No description"
+                                                }}
+                                            </strong>
+
+                                        </div>
+
+                                    </td>
+
+                                    <td>
+
+                                        <strong class="amount-cell">
+                                            Rs.
+                                            {{
+                                                "%.2f"|format(
+                                                    expense.amount
+                                                )
+                                            }}
+                                        </strong>
+
+                                    </td>
+
+                                    <td>
+
+                                        <form
+                                            action="{{
+                                                url_for(
+                                                    'delete',
+                                                    expense_id=expense.id
+                                                )
+                                            }}"
+                                            method="POST"
+                                            class="delete-form"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="delete-button"
+                                                onclick="
+                                                return confirm(
+                                                    'Are you sure you want to delete this expense?'
+                                                );
+                                                "
+                                            >
+                                                🗑
+                                            </button>
+
+                                        </form>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <div class="empty-illustration">
+                        🧾
+                    </div>
+
+                    <h3>
+                        No transactions yet
+                    </h3>
+
+                    <p>
+                        Add your first expense above.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- HIGHEST EXPENSE -->
+
+        {% if highest_expense %}
+
+            <section class="insight-card">
+
+                <div class="insight-icon">
+                    💡
+                </div>
+
+                <div>
+
+                    <span>
+                        Biggest Expense
+                    </span>
+
+                    <h3>
+                        {{
+                            highest_expense.description
+                            or highest_expense.category
+                        }}
+                    </h3>
+
+                    <p>
+                        {{ highest_expense.expense_date }}
+                        ·
+                        {{ highest_expense.category }}
+                    </p>
+
+                </div>
+
+                <strong>
+                    Rs.
+                    {{ "%.2f"|format(
+                        highest_expense.amount
+                    ) }}
+                </strong>
+
+            </section>
+
+        {% endif %}
+
+
         <footer>
 
-            <p>
-                Expense Tracker © 2026
-            </p>
+            <strong>
+                Expense Tracker
+            </strong>
 
-            <p>
-                Built with Python, Flask, SQLite & HTML/CSS
-            </p>
+            <span>
+                Built with Flask · SQLite · HTML · CSS · JavaScript
+            </span>
 
         </footer>
 
@@ -613,9 +1039,19 @@
 </div>
 
 
+<script>
+
+    const categoryData = {{ category_summary | tojson }};
+
+    const monthlyData = {{ monthly_trend | tojson }};
+
+</script>
+
+
 <script
     src="{{ url_for('static', filename='js/script.js') }}"
 ></script>
 
 </body>
+
 </html>

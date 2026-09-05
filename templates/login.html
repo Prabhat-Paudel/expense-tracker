@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ExpenseFlow — Login</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+<body class="login-page">
+
+<div class="login-container">
+
+    <!-- LEFT SIDE -->
+
+    <div class="login-info">
+
+        <div class="login-logo">
+            E
+        </div>
+
+        <h1>
+            ExpenseFlow
+        </h1>
+
+        <p>
+            Smart, simple and professional
+            expense management.
+        </p>
+
+        <div class="login-feature">
+
+            <div class="feature-icon">
+                ✓
+            </div>
+
+            <div>
+                <strong>
+                    Track your spending
+                </strong>
+
+                <span>
+                    Keep all your expenses organized.
+                </span>
+            </div>
+
+        </div>
+
+        <div class="login-feature">
+
+            <div class="feature-icon">
+                ✓
+            </div>
+
+            <div>
+                <strong>
+                    Powerful analytics
+                </strong>
+
+                <span>
+                    Understand where your money goes.
+                </span>
+            </div>
+
+        </div>
+
+        <div class="login-feature">
+
+            <div class="feature-icon">
+                ✓
+            </div>
+
+            <div>
+                <strong>
+                    Stay in control
+                </strong>
+
+                <span>
+                    Manage your finances from one place.
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RIGHT SIDE -->
+
+    <div class="login-card">
+
+        <div class="mobile-logo">
+
+            <div class="login-logo">
+                E
+            </div>
+
+            <strong>
+                ExpenseFlow
+            </strong>
+
+        </div>
+
+
+        <div class="login-heading">
+
+            <span>
+                WELCOME BACK
+            </span>
+
+            <h2>
+                Sign in to your account
+            </h2>
+
+            <p>
+                Enter your credentials to access
+                your expense dashboard.
+            </p>
+
+        </div>
+
+
+        <!-- FLASH MESSAGES -->
+
+        {% with messages =
+            get_flashed_messages(
+                with_categories=true
+            )
+        %}
+
+            {% if messages %}
+
+                <div class="login-messages">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- LOGIN FORM -->
+
+        <form
+            method="POST"
+            class="login-form"
+        >
+
+            <label for="username">
+                Username
+            </label>
+
+            <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Enter your username"
+                autocomplete="username"
+                required
+                autofocus
+            >
+
+
+            <label for="password">
+                Password
+            </label>
+
+            <div class="password-container">
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button
+                    type="button"
+                    onclick="togglePassword()"
+                >
+                    Show
+                </button>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button"
+            >
+                Sign In
+                <span>→</span>
+            </button>
+
+        </form>
+
+
+        <!-- DEMO ACCOUNT -->
+
+        <div class="demo-account">
+
+            <strong>
+                Demo Account
+            </strong>
+
+            <p>
+                Username:
+                <b>admin</b>
+            </p>
+
+            <p>
+                Password:
+                <b>admin123</b>
+            </p>
+
+        </div>
+
+
+        <div class="login-bottom">
+            ExpenseFlow • Personal Finance Dashboard
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function togglePassword() {
+
+    const password =
+        document.getElementById("password");
+
+    const button =
+        document.querySelector(
+            ".password-container button"
+        );
+
+    if (
+        password.type === "password"
+    ) {
+
+        password.type = "text";
+
+        button.textContent = "Hide";
+
+    } else {
+
+        password.type = "password";
+
+        button.textContent = "Show";
+    }
+}
+
+</script>
+
+</body>
+</html>
