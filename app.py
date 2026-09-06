@@ -1,3 +1,4 @@
+
 from datetime import date
 from functools import wraps
 
@@ -11,9 +12,15 @@ from flask import (
     session,
 )
 
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import (
+    check_password_hash,
+    generate_password_hash,
+)
 
-from database import get_connection, initialize_database
+from database import (
+    get_connection,
+    initialize_database,
+)
 
 from service import (
     add_expense,
@@ -29,30 +36,18 @@ from service import (
 
 app = Flask(__name__)
 
-# Change this to a long random value for a real deployment.
 app.secret_key = "expenseflow-secret-key-change-this"
 
 
-# ---------------------------------------------------------
-# USER / LOGIN SYSTEM
-# ---------------------------------------------------------
+# =========================================================
+# INITIALIZE USERS
+# =========================================================
 
 def initialize_users():
-    """Create users table and default admin account."""
 
     initialize_database()
 
     connection = get_connection()
-
-    connection.execute(
-        """
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
-        )
-        """
-    )
 
     existing_user = connection.execute(
         """
@@ -63,7 +58,6 @@ def initialize_users():
         ("admin",),
     ).fetchone()
 
-    # Create default account only if it doesn't exist.
     if existing_user is None:
 
         password_hash = generate_password_hash(
@@ -85,11 +79,15 @@ def initialize_users():
         )
 
     connection.commit()
+
     connection.close()
 
 
+# =========================================================
+# LOGIN REQUIRED
+# =========================================================
+
 def login_required(function):
-    """Protect pages that require login."""
 
     @wraps(function)
     def wrapper(*args, **kwargs):
@@ -97,7 +95,7 @@ def login_required(function):
         if "user_id" not in session:
 
             flash(
-                "Please log in to continue.",
+                "Please login to continue.",
                 "error",
             )
 
@@ -105,20 +103,26 @@ def login_required(function):
                 url_for("login")
             )
 
-        return function(*args, **kwargs)
+        return function(
+            *args,
+            **kwargs
+        )
 
     return wrapper
 
 
-# ---------------------------------------------------------
+# =========================================================
 # LOGIN
-# ---------------------------------------------------------
+# =========================================================
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
 def login():
 
-    # Already logged in
     if "user_id" in session:
+
         return redirect(
             url_for("dashboard")
         )
@@ -127,13 +131,24 @@ def login():
 
         username = request.form.get(
             "username",
-            ""
+            "",
         ).strip()
 
         password = request.form.get(
             "password",
-            ""
+            "",
         )
+
+        if not username or not password:
+
+            flash(
+                "Please enter username and password.",
+                "error",
+            )
+
+            return render_template(
+                "login.html"
+            )
 
         connection = get_connection()
 
@@ -152,17 +167,18 @@ def login():
             user
             and check_password_hash(
                 user["password"],
-                password
+                password,
             )
         ):
 
             session.clear()
 
             session["user_id"] = user["id"]
+
             session["username"] = user["username"]
 
             flash(
-                "Welcome back!",
+                "Login successful!",
                 "success",
             )
 
@@ -180,9 +196,146 @@ def login():
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
+# REGISTER
+# =========================================================
+
+@app.route(
+    "/register",
+    methods=["GET", "POST"]
+)
+def register():
+
+    if "user_id" in session:
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+    if request.method == "POST":
+
+        username = request.form.get(
+            "username",
+            "",
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            "",
+        )
+
+        confirm_password = request.form.get(
+            "confirm_password",
+            "",
+        )
+
+        if not username or not password:
+
+            flash(
+                "All fields are required.",
+                "error",
+            )
+
+            return render_template(
+                "register.html"
+            )
+
+        if len(username) < 3:
+
+            flash(
+                "Username must contain at least 3 characters.",
+                "error",
+            )
+
+            return render_template(
+                "register.html"
+            )
+
+        if len(password) < 6:
+
+            flash(
+                "Password must contain at least 6 characters.",
+                "error",
+            )
+
+            return render_template(
+                "register.html"
+            )
+
+        if password != confirm_password:
+
+            flash(
+                "Passwords do not match.",
+                "error",
+            )
+
+            return render_template(
+                "register.html"
+            )
+
+        connection = get_connection()
+
+        existing_user = connection.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE username = ?
+            """,
+            (username,),
+        ).fetchone()
+
+        if existing_user:
+
+            connection.close()
+
+            flash(
+                "Username already exists. Please choose another.",
+                "error",
+            )
+
+            return render_template(
+                "register.html"
+            )
+
+        password_hash = generate_password_hash(
+            password
+        )
+
+        connection.execute(
+            """
+            INSERT INTO users (
+                username,
+                password
+            )
+            VALUES (?, ?)
+            """,
+            (
+                username,
+                password_hash,
+            ),
+        )
+
+        connection.commit()
+
+        connection.close()
+
+        flash(
+            "Account created successfully! You can now login.",
+            "success",
+        )
+
+        return redirect(
+            url_for("login")
+        )
+
+    return render_template(
+        "register.html"
+    )
+
+
+# =========================================================
 # LOGOUT
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/logout")
 def logout():
@@ -190,7 +343,7 @@ def logout():
     session.clear()
 
     flash(
-        "You have been logged out.",
+        "You have been logged out successfully.",
         "success",
     )
 
@@ -199,15 +352,19 @@ def logout():
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # DASHBOARD
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/")
 @login_required
 def dashboard():
 
-    expenses = list_expenses()
+    user_id = session["user_id"]
+
+    expenses = list_expenses(
+        user_id
+    )
 
     today = date.today()
 
@@ -218,18 +375,28 @@ def dashboard():
 
     current_month_total, monthly_categories = (
         get_monthly_summary(
+            user_id,
             today.year,
             today.month,
         )
     )
 
-    category_summary = get_category_summary()
+    category_summary = get_category_summary(
+        user_id
+    )
 
-    monthly_trend = get_monthly_trend(6)
+    monthly_trend = get_monthly_trend(
+        user_id,
+        6,
+    )
 
-    average_expense = get_average_expense()
+    average_expense = get_average_expense(
+        user_id
+    )
 
-    highest_expense = get_highest_expense()
+    highest_expense = get_highest_expense(
+        user_id
+    )
 
     return render_template(
         "dashboard.html",
@@ -258,18 +425,23 @@ def dashboard():
 
         username=session.get(
             "username",
-            "Admin",
+            "User",
         ),
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # ADD EXPENSE
-# ---------------------------------------------------------
+# =========================================================
 
-@app.route("/add", methods=["POST"])
+@app.route(
+    "/add",
+    methods=["POST"]
+)
 @login_required
 def add():
+
+    user_id = session["user_id"]
 
     try:
 
@@ -294,9 +466,13 @@ def add():
         )
 
         if not expense_date:
-            expense_date = date.today().isoformat()
+
+            expense_date = (
+                date.today().isoformat()
+            )
 
         add_expense(
+            user_id,
             amount,
             category,
             description,
@@ -320,19 +496,22 @@ def add():
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # DELETE EXPENSE
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route(
     "/delete/<int:expense_id>",
-    methods=["POST"],
+    methods=["POST"]
 )
 @login_required
 def delete(expense_id):
 
+    user_id = session["user_id"]
+
     deleted = delete_expense(
-        expense_id
+        user_id,
+        expense_id,
     )
 
     if deleted:
@@ -354,13 +533,15 @@ def delete(expense_id):
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # MONTHLY SUMMARY
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/summary")
 @login_required
 def summary():
+
+    user_id = session["user_id"]
 
     try:
 
@@ -384,7 +565,9 @@ def summary():
                 "Month must be between 1 and 12."
             )
 
-        expenses = list_expenses()
+        expenses = list_expenses(
+            user_id
+        )
 
         today = date.today()
 
@@ -395,6 +578,7 @@ def summary():
 
         current_month_total, monthly_categories = (
             get_monthly_summary(
+                user_id,
                 year,
                 month,
             )
@@ -411,13 +595,22 @@ def summary():
 
             monthly_categories=monthly_categories,
 
-            category_summary=get_category_summary(),
+            category_summary=get_category_summary(
+                user_id
+            ),
 
-            monthly_trend=get_monthly_trend(6),
+            monthly_trend=get_monthly_trend(
+                user_id,
+                6,
+            ),
 
-            average_expense=get_average_expense(),
+            average_expense=get_average_expense(
+                user_id
+            ),
 
-            highest_expense=get_highest_expense(),
+            highest_expense=get_highest_expense(
+                user_id
+            ),
 
             today=today.isoformat(),
 
@@ -427,7 +620,7 @@ def summary():
 
             username=session.get(
                 "username",
-                "Admin",
+                "User",
             ),
         )
 
@@ -443,9 +636,9 @@ def summary():
         )
 
 
-# ---------------------------------------------------------
-# START APPLICATION
-# ---------------------------------------------------------
+# =========================================================
+# RUN APPLICATION
+# =========================================================
 
 if __name__ == "__main__":
 
@@ -454,3 +647,4 @@ if __name__ == "__main__":
     app.run(
         debug=True
     )
+
