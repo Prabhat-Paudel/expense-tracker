@@ -1,187 +1,67 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-    <meta charset="UTF-8">
+```
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <title>ExpenseFlow — Create Account</title>
+<title>Create Account | Expense Tracker</title>
 
-
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-        crossorigin
-    >
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/style.css') }}"
-    >
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+>
+```
 
 </head>
 
+<body class="auth-body">
 
-<body class="login-page">
+```
+<div class="auth-container">
 
+    <div class="auth-card">
 
-<div class="login-container">
-
-
-    <!-- LEFT SIDE -->
-
-    <div class="login-info">
-
-        <div class="login-logo">
-            E
+        <div class="auth-logo">
+            💰
         </div>
 
         <h1>
-            ExpenseFlow
+            Create Account
         </h1>
 
-        <p>
-            Create your account and start
-            managing your expenses professionally.
+        <p class="auth-subtitle">
+            Start tracking your expenses
         </p>
 
 
-        <div class="login-feature">
-
-            <div class="feature-icon">
-                ✓
-            </div>
-
-            <div>
-
-                <strong>
-                    Secure account
-                </strong>
-
-                <span>
-                    Your password is securely hashed
-                    before being stored.
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="login-feature">
-
-            <div class="feature-icon">
-                ✓
-            </div>
-
-            <div>
-
-                <strong>
-                    Personal dashboard
-                </strong>
-
-                <span>
-                    Access your expense analytics
-                    after signing in.
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="login-feature">
-
-            <div class="feature-icon">
-                ✓
-            </div>
-
-            <div>
-
-                <strong>
-                    Easy management
-                </strong>
-
-                <span>
-                    Add, view and manage your expenses
-                    in one place.
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- REGISTER CARD -->
-
-    <div class="login-card">
-
-
-        <div class="mobile-logo">
-
-            <div class="login-logo">
-                E
-            </div>
-
-            <strong>
-                ExpenseFlow
-            </strong>
-
-        </div>
-
-
-        <div class="login-heading">
-
-            <span>
-                GET STARTED
-            </span>
-
-            <h2>
-                Create your account
-            </h2>
-
-            <p>
-                Enter your details to create a new
-                ExpenseFlow account.
-            </p>
-
-        </div>
-
-
-        <!-- FLASH MESSAGES -->
-
-        {% with messages =
-            get_flashed_messages(
-                with_categories=true
-            )
-        %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
 
             {% if messages %}
 
-                <div class="login-messages">
+                <div class="notifications">
 
                     {% for category, message in messages %}
 
-                        <div class="flash {{ category }}">
+                        <div class="notification {{ category }}">
+
+                            <span>
+                                {% if category == "success" %}
+                                    ✓
+                                {% else %}
+                                    !
+                                {% endif %}
+                            </span>
+
                             {{ message }}
+
                         </div>
 
                     {% endfor %}
@@ -193,96 +73,93 @@
         {% endwith %}
 
 
-        <!-- REGISTER FORM -->
-
         <form
             method="POST"
-            class="login-form"
+            class="auth-form"
         >
 
+            <div class="form-group">
 
-            <label for="username">
-                Username
-            </label>
+                <label for="username">
+                    Username
+                </label>
 
-            <input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="Choose a username"
-                minlength="3"
-                required
-                autofocus
-            >
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Choose username"
+                    minlength="3"
+                    required
+                    autofocus
+                >
 
-
-            <label for="password">
-                Password
-            </label>
-
-            <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Create a password"
-                minlength="6"
-                required
-            >
+            </div>
 
 
-            <label for="confirm_password">
-                Confirm Password
-            </label>
+            <div class="form-group">
 
-            <input
-                type="password"
-                id="confirm_password"
-                name="confirm_password"
-                placeholder="Enter password again"
-                minlength="6"
-                required
-            >
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Minimum 6 characters"
+                    minlength="6"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="confirm_password">
+                    Confirm Password
+                </label>
+
+                <input
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    placeholder="Repeat password"
+                    minlength="6"
+                    required
+                >
+
+            </div>
 
 
             <button
                 type="submit"
-                class="login-button"
+                class="btn btn-primary full-width"
             >
-
                 Create Account
-
-                <span>
-                    →
-                </span>
-
             </button>
 
         </form>
 
 
-        <!-- LOGIN LINK -->
-
-        <div class="register-link">
+        <p class="auth-footer">
 
             Already have an account?
 
             <a href="{{ url_for('login') }}">
-                Sign in
+                Login
             </a>
 
-        </div>
-
-
-        <div class="login-bottom">
-
-            ExpenseFlow • Personal Finance Dashboard
-
-        </div>
+        </p>
 
     </div>
 
 </div>
 
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+```
 
 </body>
 
