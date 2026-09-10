@@ -1,182 +1,67 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-    <meta charset="UTF-8">
+```
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <title>ExpenseFlow — Login</title>
+<title>Login | Expense Tracker</title>
 
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/style.css') }}"
-    >
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+>
+```
 
 </head>
 
+<body class="auth-body">
 
-<body class="login-page">
+```
+<div class="auth-container">
 
+    <div class="auth-card">
 
-<div class="login-container">
-
-
-    <!-- LEFT SIDE -->
-
-    <div class="login-info">
-
-        <div class="login-logo">
-            E
+        <div class="auth-logo">
+            💰
         </div>
 
         <h1>
-            ExpenseFlow
+            Expense Tracker
         </h1>
 
-        <p>
-            Smart, simple and professional
-            expense management.
+        <p class="auth-subtitle">
+            Manage your money smarter
         </p>
 
 
-        <div class="login-feature">
-
-            <div class="feature-icon">
-                ✓
-            </div>
-
-            <div>
-
-                <strong>
-                    Track your spending
-                </strong>
-
-                <span>
-                    Keep all your expenses organized.
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="login-feature">
-
-            <div class="feature-icon">
-                ✓
-            </div>
-
-            <div>
-
-                <strong>
-                    Powerful analytics
-                </strong>
-
-                <span>
-                    Understand where your money goes.
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="login-feature">
-
-            <div class="feature-icon">
-                ✓
-            </div>
-
-            <div>
-
-                <strong>
-                    Stay in control
-                </strong>
-
-                <span>
-                    Manage your finances from one place.
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- LOGIN CARD -->
-
-    <div class="login-card">
-
-
-        <div class="mobile-logo">
-
-            <div class="login-logo">
-                E
-            </div>
-
-            <strong>
-                ExpenseFlow
-            </strong>
-
-        </div>
-
-
-        <div class="login-heading">
-
-            <span>
-                WELCOME BACK
-            </span>
-
-            <h2>
-                Sign in to your account
-            </h2>
-
-            <p>
-                Enter your credentials to access
-                your expense dashboard.
-            </p>
-
-        </div>
-
-
-        <!-- FLASH MESSAGES -->
-
-        {% with messages =
-            get_flashed_messages(
-                with_categories=true
-            )
-        %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
 
             {% if messages %}
 
-                <div class="login-messages">
+                <div class="notifications">
 
                     {% for category, message in messages %}
 
-                        <div class="flash {{ category }}">
+                        <div class="notification {{ category }}">
+
+                            <span>
+                                {% if category == "success" %}
+                                    ✓
+                                {% else %}
+                                    !
+                                {% endif %}
+                            </span>
+
                             {{ message }}
+
                         </div>
 
                     {% endfor %}
@@ -188,146 +73,73 @@
         {% endwith %}
 
 
-        <!-- LOGIN FORM -->
-
         <form
             method="POST"
-            class="login-form"
+            class="auth-form"
         >
 
-            <label for="username">
-                Username
-            </label>
+            <div class="form-group">
 
-            <input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="Enter your username"
-                autocomplete="username"
-                required
-                autofocus
-            >
+                <label for="username">
+                    Username
+                </label>
 
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter username"
+                    required
+                    autofocus
+                >
 
-            <label for="password">
-                Password
-            </label>
+            </div>
 
 
-            <div class="password-container">
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
 
                 <input
                     type="password"
                     id="password"
                     name="password"
-                    placeholder="Enter your password"
-                    autocomplete="current-password"
+                    placeholder="Enter password"
                     required
                 >
-
-                <button
-                    type="button"
-                    onclick="togglePassword()"
-                >
-                    Show
-                </button>
 
             </div>
 
 
             <button
                 type="submit"
-                class="login-button"
+                class="btn btn-primary full-width"
             >
-
-                Sign In
-
-                <span>
-                    →
-                </span>
-
+                Login
             </button>
 
         </form>
 
 
-        <!-- REGISTER -->
-
-        <div class="register-link">
+        <p class="auth-footer">
 
             Don't have an account?
 
             <a href="{{ url_for('register') }}">
-                Create Account
+                Create account
             </a>
 
-        </div>
-
-
-        <!-- DEMO ACCOUNT -->
-
-        <div class="demo-account">
-
-            <strong>
-                Demo Account
-            </strong>
-
-            <p>
-                Username:
-                <b>admin</b>
-            </p>
-
-            <p>
-                Password:
-                <b>admin123</b>
-            </p>
-
-        </div>
-
-
-        <div class="login-bottom">
-
-            ExpenseFlow • Personal Finance Dashboard
-
-        </div>
+        </p>
 
     </div>
 
 </div>
 
 
-<script>
-
-function togglePassword() {
-
-    const password =
-        document.getElementById("password");
-
-    const button =
-        document.querySelector(
-            ".password-container button"
-        );
-
-
-    if (password.type === "password") {
-
-        password.type = "text";
-
-        button.textContent = "Hide";
-
-    } else {
-
-        password.type = "password";
-
-        button.textContent = "Show";
-
-    }
-
-}
-
-</script>
-
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+```
 
 </body>
 
