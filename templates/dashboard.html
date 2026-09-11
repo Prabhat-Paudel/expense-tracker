@@ -1,153 +1,154 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html> <html lang="en"> <head>
+<meta charset="UTF-8">
 
-<head>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <meta charset="UTF-8">
+<title>Dashboard | Expense Tracker</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+>
 
-    <title>Expense Tracker | Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head> <body class="dashboard-page">
+<!-- SIDEBAR -->
 
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
+<aside class="sidebar" id="sidebar">
 
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
+    <div class="sidebar-brand">
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+        <div class="sidebar-logo">
+            💰
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <div>
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/style.css') }}"
-    >
+            <h2>
+                Expense
+            </h2>
 
-</head>
-
-
-<body>
-
-<div class="app">
-
-    <!-- =====================================================
-         SIDEBAR
-         ===================================================== -->
-
-    <aside class="sidebar">
-
-        <!-- BRAND -->
-
-        <div class="brand">
-
-            <div class="brand-icon">
-                💰
-            </div>
-
-            <div>
-                <strong>Expense</strong>
-                <span>Tracker</span>
-            </div>
+            <span>
+                Tracker
+            </span>
 
         </div>
 
+    </div>
 
-        <!-- NAVIGATION -->
 
-        <nav class="navigation">
+    <nav class="sidebar-nav">
 
-            <a
-                href="#dashboard"
-                class="nav-link active"
-            >
-                <span>⌂</span>
+        <a
+            href="{{ url_for('dashboard') }}"
+            class="nav-item active"
+        >
+
+            <span class="nav-icon">⌂</span>
+
+            <span>
                 Dashboard
-            </a>
+            </span>
+
+        </a>
 
 
-            <a
-                href="#add-expense"
-                class="nav-link"
-            >
-                <span>＋</span>
+        <a
+            href="#add-expense"
+            class="nav-item"
+        >
+
+            <span class="nav-icon">＋</span>
+
+            <span>
                 Add Expense
-            </a>
+            </span>
+
+        </a>
 
 
-            <a
-                href="#analytics"
-                class="nav-link"
-            >
-                <span>◔</span>
+        <a
+            href="#analytics"
+            class="nav-item"
+        >
+
+            <span class="nav-icon">◔</span>
+
+            <span>
                 Analytics
-            </a>
+            </span>
+
+        </a>
 
 
-            <a
-                href="#transactions"
-                class="nav-link"
-            >
-                <span>▤</span>
+        <a
+            href="#transactions"
+            class="nav-item"
+        >
+
+            <span class="nav-icon">▤</span>
+
+            <span>
                 Transactions
-            </a>
+            </span>
 
-        </nav>
-
-
-        <!-- SIDEBAR BOTTOM -->
-
-        <div class="sidebar-bottom">
-
-            <button
-                id="themeToggle"
-                class="theme-toggle"
-                type="button"
-            >
-
-                <span id="themeIcon">
-                    🌙
-                </span>
-
-                <span>
-                    Dark Mode
-                </span>
-
-            </button>
-
-        </div>
+        </a>
 
 
-        <!-- CURRENT USER -->
+        <a
+            href="{{ url_for('export_csv') }}"
+            class="nav-item"
+        >
+
+            <span class="nav-icon">⇩</span>
+
+            <span>
+                Export CSV
+            </span>
+
+        </a>
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+        <button
+            type="button"
+            class="dark-mode-button"
+            onclick="toggleDarkMode()"
+        >
+
+            <span>
+                🌙
+            </span>
+
+            <span>
+                Dark Mode
+            </span>
+
+        </button>
+
 
         <div class="sidebar-user">
 
             <div class="user-avatar">
 
-                {{ username[0] | upper }}
+                {{ username[0]|upper }}
 
             </div>
 
-
-            <div class="user-details">
+            <div class="user-info">
 
                 <strong>
                     {{ username }}
                 </strong>
 
                 <span>
-                    Logged in
+                    Personal Account
                 </span>
 
             </div>
@@ -155,412 +156,504 @@
         </div>
 
 
-        <!-- LOGOUT -->
-
         <a
             href="{{ url_for('logout') }}"
-            class="logout-button"
+            class="logout-link"
         >
 
             <span>
-                ↪
+                ⇥
             </span>
 
             Logout
 
         </a>
 
-    </aside>
+    </div>
+
+</aside>
 
 
-    <!-- =====================================================
-         MAIN CONTENT
-         ===================================================== -->
+<!-- MAIN CONTENT -->
 
-    <main class="main">
+<main class="dashboard-main">
 
 
-        <!-- TOPBAR -->
+    <!-- TOP BAR -->
 
-        <header class="topbar">
+    <header class="dashboard-header">
 
-            <div>
-
-                <p class="eyebrow">
-                    PERSONAL FINANCE
-                </p>
-
-
-                <h1>
-                    Dashboard
-                </h1>
+        <button
+            type="button"
+            class="mobile-menu-button"
+            onclick="toggleSidebar()"
+        >
+            ☰
+        </button>
 
 
-                <p class="subtitle">
-                    Here's your financial overview.
-                </p>
+        <div class="header-title">
+
+            <span>
+                PERSONAL FINANCE
+            </span>
+
+            <h1>
+                Dashboard
+            </h1>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <button
+                type="button"
+                class="header-dark-button"
+                onclick="toggleDarkMode()"
+            >
+                🌙
+            </button>
+
+
+            <div class="header-user">
+
+                <div class="header-avatar">
+
+                    {{ username[0]|upper }}
+
+                </div>
+
+                <div>
+
+                    <strong>
+                        {{ username }}
+                    </strong>
+
+                    <small>
+                        Personal Account
+                    </small>
+
+                </div>
 
             </div>
 
+        </div>
 
-            <div class="topbar-right">
+    </header>
 
-                <div class="today">
+
+    <!-- PAGE INTRO -->
+
+    <section class="dashboard-intro">
+
+        <div>
+
+            <h2>
+                Welcome back, {{ username }} 👋
+            </h2>
+
+            <p>
+                Here's an overview of your financial activity.
+            </p>
+
+        </div>
+
+        <div class="today-badge">
+
+            📅
+
+            <span>
+                Today
+            </span>
+
+            <strong>
+                {{ today }}
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <!-- FLASH MESSAGES -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="dashboard-flash">
+
+                {% for category, message in messages %}
+
+                    <div class="dashboard-alert {{ category }}">
+
+                        {% if category == "success" %}
+                            ✓
+                        {% else %}
+                            !
+                        {% endif %}
+
+                        {{ message }}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- STAT CARDS -->
+
+    <section class="stats-grid">
+
+
+        <div class="stat-card">
+
+            <div class="stat-card-top">
+
+                <div class="stat-icon purple">
+                    💳
+                </div>
+
+                <span class="stat-label">
+                    Total Spending
+                </span>
+
+            </div>
+
+            <h3>
+                Rs. {{ "%.2f"|format(total) }}
+            </h3>
+
+            <p>
+                All recorded expenses
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-card-top">
+
+                <div class="stat-icon blue">
+                    📅
+                </div>
+
+                <span class="stat-label">
+                    This Month
+                </span>
+
+            </div>
+
+            <h3>
+                Rs. {{ "%.2f"|format(current_month_total) }}
+            </h3>
+
+            <p>
+                Current month spending
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-card-top">
+
+                <div class="stat-icon green">
+                    ↗
+                </div>
+
+                <span class="stat-label">
+                    Average Expense
+                </span>
+
+            </div>
+
+            <h3>
+                Rs. {{ "%.2f"|format(average_expense) }}
+            </h3>
+
+            <p>
+                Average per transaction
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-card-top">
+
+                <div class="stat-icon orange">
+                    #
+                </div>
+
+                <span class="stat-label">
+                    Transactions
+                </span>
+
+            </div>
+
+            <h3>
+                {{ transaction_count }}
+            </h3>
+
+            <p>
+                Total transactions
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- BUDGET -->
+
+    <section class="dashboard-section">
+
+        <div class="section-header">
+
+            <div>
+
+                <span class="section-label">
+                    MONTHLY BUDGET
+                </span>
+
+                <h2>
+                    Budget Overview
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="budget-card">
+
+            <div class="budget-main">
+
+                <div class="budget-icon">
+                    🎯
+                </div>
+
+                <div class="budget-info">
 
                     <span>
-                        Today
+                        Monthly Budget
                     </span>
 
                     <strong>
-                        {{ today }}
+                        Rs. {{ "%.2f"|format(budget) }}
                     </strong>
 
                 </div>
 
             </div>
 
-        </header>
 
-
-        <!-- =================================================
-             FLASH MESSAGES
-             ================================================= -->
-
-        {% with messages = get_flashed_messages(
-            with_categories=true
-        ) %}
-
-            {% if messages %}
-
-                <div class="notifications">
-
-                    {% for category, message in messages %}
-
-                        <div
-                            class="notification {{ category }}"
-                        >
-
-                            <span>
-
-                                {% if category == "success" %}
-
-                                    ✓
-
-                                {% else %}
-
-                                    !
-
-                                {% endif %}
-
-                            </span>
-
-                            {{ message }}
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-            {% endif %}
-
-        {% endwith %}
-
-
-        <!-- =================================================
-             STAT CARDS
-             ================================================= -->
-
-        <section
-            class="stats"
-            id="dashboard"
-        >
-
-
-            <!-- TOTAL SPENDING -->
-
-            <div class="stat-card">
-
-                <div class="stat-header">
-
-                    <span class="stat-label">
-                        Total Spending
-                    </span>
-
-                    <span class="stat-icon blue">
-                        ₹
-                    </span>
-
-                </div>
-
-
-                <h2>
-                    Rs.
-                    {{ "%.2f"|format(total) }}
-                </h2>
-
-
-                <p class="stat-description">
-                    All recorded expenses
-                </p>
-
-            </div>
-
-
-            <!-- THIS MONTH -->
-
-            <div class="stat-card">
-
-                <div class="stat-header">
-
-                    <span class="stat-label">
-                        This Month
-                    </span>
-
-                    <span class="stat-icon purple">
-                        ◷
-                    </span>
-
-                </div>
-
-
-                <h2>
-                    Rs.
-                    {{ "%.2f"|format(
-                        current_month_total
-                    ) }}
-                </h2>
-
-
-                <p class="stat-description">
-                    Current month spending
-                </p>
-
-            </div>
-
-
-            <!-- AVERAGE -->
-
-            <div class="stat-card">
-
-                <div class="stat-header">
-
-                    <span class="stat-label">
-                        Average Expense
-                    </span>
-
-                    <span class="stat-icon green">
-                        ↗
-                    </span>
-
-                </div>
-
-
-                <h2>
-                    Rs.
-                    {{ "%.2f"|format(
-                        average_expense
-                    ) }}
-                </h2>
-
-
-                <p class="stat-description">
-                    Average per transaction
-                </p>
-
-            </div>
-
-
-            <!-- TRANSACTIONS -->
-
-            <div class="stat-card">
-
-                <div class="stat-header">
-
-                    <span class="stat-label">
-                        Transactions
-                    </span>
-
-                    <span class="stat-icon orange">
-                        #
-                    </span>
-
-                </div>
-
-
-                <h2>
-                    {{ expenses|length }}
-                </h2>
-
-
-                <p class="stat-description">
-                    Total transactions
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             CHARTS
-             ================================================= -->
-
-        <section
-            class="charts"
-            id="analytics"
-        >
-
-
-            <!-- MONTHLY CHART -->
-
-            <div class="card chart-card">
-
-                <div class="card-header">
-
-                    <div>
-
-                        <h2>
-                            Spending Overview
-                        </h2>
-
-                        <p>
-                            Your spending during the last 6 months
-                        </p>
-
-                    </div>
-
-
-                    <span class="chart-badge">
-                        6 Months
-                    </span>
-
-                </div>
-
-
-                <div class="chart-container">
-
-                    <canvas
-                        id="monthlyChart"
-                    ></canvas>
-
-                </div>
-
-            </div>
-
-
-            <!-- CATEGORY CHART -->
-
-            <div class="card chart-card category-chart-card">
-
-                <div class="card-header">
-
-                    <div>
-
-                        <h2>
-                            Spending by Category
-                        </h2>
-
-                        <p>
-                            Where your money goes
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="donut-container">
-
-                    <canvas
-                        id="categoryChart"
-                    ></canvas>
-
-                </div>
-
-
-                <div class="category-summary">
-
-                    {% for item in category_summary[:5] %}
-
-                        <div class="category-row">
-
-                            <span>
-                                {{ item.category }}
-                            </span>
-
-                            <strong>
-                                Rs.
-                                {{ "%.2f"|format(
-                                    item.total
-                                ) }}
-                            </strong>
-
-                        </div>
-
-                    {% else %}
-
-                        <p class="empty">
-                            No category data yet.
-                        </p>
-
-                    {% endfor %}
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             ADD EXPENSE
-             ================================================= -->
-
-        <section
-            class="card add-card"
-            id="add-expense"
-        >
-
-            <div class="card-header">
+            <div class="budget-stats">
 
                 <div>
 
-                    <h2>
-                        Add New Expense
-                    </h2>
+                    <span>
+                        Spent
+                    </span>
 
-                    <p>
-                        Record a new transaction
-                    </p>
+                    <strong>
+                        Rs. {{ "%.2f"|format(current_month_total) }}
+                    </strong>
 
                 </div>
 
 
-                <span class="add-icon">
-                    ＋
-                </span>
+                <div>
+
+                    <span>
+                        Remaining
+                    </span>
+
+                    <strong class="remaining-money">
+                        Rs. {{ "%.2f"|format(budget_remaining) }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="budget-progress-container">
+
+                <div class="budget-progress-top">
+
+                    <span>
+                        Budget usage
+                    </span>
+
+                    <strong>
+                        {{ "%.1f"|format(budget_progress) }}%
+                    </strong>
+
+                </div>
+
+                <div class="budget-progress">
+
+                    <div
+                        class="budget-progress-bar"
+                        style="width: {{ budget_progress }}%"
+                    ></div>
+
+                </div>
 
             </div>
 
 
             <form
-                action="{{ url_for('add') }}"
                 method="POST"
+                action="{{ url_for('update_budget') }}"
+                class="budget-form"
+            >
+
+                <input
+                    type="number"
+                    name="budget"
+                    placeholder="Set monthly budget"
+                    min="0"
+                    step="0.01"
+                    value="{{ budget if budget else '' }}"
+                    required
+                >
+
+                <button type="submit">
+                    Update Budget
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- CHARTS -->
+
+    <section
+        class="charts-grid"
+        id="analytics"
+    >
+
+
+        <!-- MONTHLY CHART -->
+
+        <div class="chart-card">
+
+            <div class="chart-header">
+
+                <div>
+
+                    <span class="section-label">
+                        SPENDING TREND
+                    </span>
+
+                    <h2>
+                        Monthly Spending
+                    </h2>
+
+                </div>
+
+                <span class="chart-badge">
+                    Last 6 months
+                </span>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="monthlyChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- CATEGORY CHART -->
+
+        <div class="chart-card">
+
+            <div class="chart-header">
+
+                <div>
+
+                    <span class="section-label">
+                        BREAKDOWN
+                    </span>
+
+                    <h2>
+                        By Category
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div class="chart-container category-chart-container">
+
+                <canvas id="categoryChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ADD EXPENSE -->
+
+    <section
+        class="dashboard-section"
+        id="add-expense"
+    >
+
+        <div class="section-header">
+
+            <div>
+
+                <span class="section-label">
+                    NEW TRANSACTION
+                </span>
+
+                <h2>
+                    Add Expense
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="expense-form-card">
+
+            <form
+                method="POST"
+                action="{{ url_for('add') }}"
                 class="expense-form"
             >
 
+                <div class="form-field">
 
-                <!-- AMOUNT -->
-
-                <div class="form-group">
-
-                    <label for="amount">
+                    <label>
                         Amount
                     </label>
 
-
-                    <div class="input-wrapper">
+                    <div class="dashboard-input-wrapper">
 
                         <span>
                             Rs.
@@ -568,11 +661,10 @@
 
                         <input
                             type="number"
-                            id="amount"
                             name="amount"
-                            step="0.01"
-                            min="0.01"
                             placeholder="0.00"
+                            min="0.01"
+                            step="0.01"
                             required
                         >
 
@@ -581,17 +673,13 @@
                 </div>
 
 
-                <!-- CATEGORY -->
+                <div class="form-field">
 
-                <div class="form-group">
-
-                    <label for="category">
+                    <label>
                         Category
                     </label>
 
-
                     <select
-                        id="category"
                         name="category"
                         required
                     >
@@ -600,199 +688,10 @@
                             Select category
                         </option>
 
-                        <option value="Food">
-                            🍔 Food
-                        </option>
+                        {% for category in categories %}
 
-                        <option value="Transport">
-                            🚗 Transport
-                        </option>
-
-                        <option value="Shopping">
-                            🛒 Shopping
-                        </option>
-
-                        <option value="Entertainment">
-                            🎬 Entertainment
-                        </option>
-
-                        <option value="Bills">
-                            💡 Bills
-                        </option>
-
-                        <option value="Education">
-                            📚 Education
-                        </option>
-
-                        <option value="Health">
-                            🏥 Health
-                        </option>
-
-                        <option value="Other">
-                            📦 Other
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- DATE -->
-
-                <div class="form-group">
-
-                    <label for="expense_date">
-                        Date
-                    </label>
-
-
-                    <input
-                        type="date"
-                        id="expense_date"
-                        name="expense_date"
-                        value="{{ today }}"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- DESCRIPTION -->
-
-                <div class="form-group">
-
-                    <label for="description">
-                        Description
-                    </label>
-
-
-                    <input
-                        type="text"
-                        id="description"
-                        name="description"
-                        placeholder="What was this expense for?"
-                    >
-
-                </div>
-
-
-                <!-- BUTTONS -->
-
-                <div class="form-actions">
-
-                    <button
-                        type="reset"
-                        class="btn btn-secondary"
-                    >
-                        Clear
-                    </button>
-
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                    >
-                        + Add Expense
-                    </button>
-
-                </div>
-
-            </form>
-
-        </section>
-
-
-        <!-- =================================================
-             MONTHLY SUMMARY
-             ================================================= -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <div>
-
-                    <h2>
-                        Monthly Summary
-                    </h2>
-
-                    <p>
-                        Analyze spending for a specific month
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <form
-                action="{{ url_for('summary') }}"
-                method="GET"
-                class="summary-form"
-            >
-
-                <!-- YEAR -->
-
-                <div class="form-group">
-
-                    <label for="year">
-                        Year
-                    </label>
-
-
-                    <input
-                        type="number"
-                        id="year"
-                        name="year"
-                        value="{{ summary_year }}"
-                        min="2000"
-                        max="2100"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- MONTH -->
-
-                <div class="form-group">
-
-                    <label for="month">
-                        Month
-                    </label>
-
-
-                    <select
-                        id="month"
-                        name="month"
-                    >
-
-                        {% for month_number in range(1, 13) %}
-
-                            <option
-                                value="{{ month_number }}"
-                                {% if summary_month == month_number %}
-                                    selected
-                                {% endif %}
-                            >
-
-                                {{
-                                    [
-                                        "January",
-                                        "February",
-                                        "March",
-                                        "April",
-                                        "May",
-                                        "June",
-                                        "July",
-                                        "August",
-                                        "September",
-                                        "October",
-                                        "November",
-                                        "December"
-                                    ][month_number - 1]
-                                }}
-
+                            <option value="{{ category }}">
+                                {{ category }}
                             </option>
 
                         {% endfor %}
@@ -802,181 +701,106 @@
                 </div>
 
 
+                <div class="form-field">
+
+                    <label>
+                        Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="expense_date"
+                        value="{{ today }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-field form-field-wide">
+
+                    <label>
+                        Description
+                    </label>
+
+                    <input
+                        type="text"
+                        name="description"
+                        placeholder="What did you spend money on?"
+                        maxlength="200"
+                    >
+
+                </div>
+
+
                 <button
                     type="submit"
-                    class="btn btn-primary summary-button"
+                    class="add-expense-button"
                 >
-                    View Summary
+
+                    <span>
+                        ＋
+                    </span>
+
+                    Add Expense
+
                 </button>
 
             </form>
 
+        </div>
 
-            <!-- MONTHLY TOTAL -->
-
-            <div class="monthly-total">
-
-                <div>
-
-                    <span>
-                        Selected Month Total
-                    </span>
+    </section>
 
 
-                    <strong>
-                        Rs.
-                        {{ "%.2f"|format(
-                            current_month_total
-                        ) }}
-                    </strong>
+    <!-- RECENT TRANSACTIONS -->
 
-                </div>
+    <section
+        class="dashboard-section"
+        id="transactions"
+    >
 
+        <div class="section-header transaction-header">
 
-                <div class="monthly-icon">
-                    📊
-                </div>
+            <div>
+
+                <span class="section-label">
+                    TRANSACTION HISTORY
+                </span>
+
+                <h2>
+                    Recent Transactions
+                </h2>
 
             </div>
 
 
-            <!-- CATEGORY SUMMARY -->
+            <a
+                href="{{ url_for('export_csv') }}"
+                class="export-button"
+            >
+                ⇩ Export CSV
+            </a>
 
-            {% if monthly_categories %}
-
-                <div class="summary-categories">
-
-                    {% for item in monthly_categories %}
-
-                        <div class="summary-category">
-
-                            <div class="summary-category-top">
-
-                                <span>
-                                    {{ item.category }}
-                                </span>
+        </div>
 
 
-                                <strong>
-                                    Rs.
-                                    {{ "%.2f"|format(
-                                        item.total
-                                    ) }}
-                                </strong>
+        <div class="transaction-card">
 
-                            </div>
+            <div class="transaction-search">
 
+                <div class="search-wrapper">
 
-                            <div class="progress">
-
-                                <span
-                                    style="
-                                    width:
-                                    {{
-                                        (
-                                            item.total /
-                                            current_month_total *
-                                            100
-                                        )
-                                        if current_month_total > 0
-                                        else 0
-                                    }}%;
-                                    "
-                                ></span>
-
-                            </div>
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-            {% else %}
-
-                <div class="empty-state small">
-
-                    No expenses found for this month.
-
-                </div>
-
-            {% endif %}
-
-        </section>
-
-
-        <!-- =================================================
-             TRANSACTIONS
-             ================================================= -->
-
-        <section
-            class="card transactions-card"
-            id="transactions"
-        >
-
-            <div class="card-header transactions-header">
-
-                <div>
-
-                    <h2>
-                        Recent Transactions
-                    </h2>
-
-                    <p>
-                        Manage all your expenses
-                    </p>
-
-                </div>
-
-
-                <div class="transaction-tools">
+                    <span>
+                        🔍
+                    </span>
 
                     <input
-                        type="search"
-                        id="searchInput"
-                        placeholder="🔎 Search..."
+                        type="text"
+                        id="expenseSearch"
+                        placeholder="Search transactions..."
+                        onkeyup="filterExpenses()"
                     >
-
-
-                    <select id="categoryFilter">
-
-                        <option value="">
-                            All Categories
-                        </option>
-
-                        <option value="Food">
-                            Food
-                        </option>
-
-                        <option value="Transport">
-                            Transport
-                        </option>
-
-                        <option value="Shopping">
-                            Shopping
-                        </option>
-
-                        <option value="Entertainment">
-                            Entertainment
-                        </option>
-
-                        <option value="Bills">
-                            Bills
-                        </option>
-
-                        <option value="Education">
-                            Education
-                        </option>
-
-                        <option value="Health">
-                            Health
-                        </option>
-
-                        <option value="Other">
-                            Other
-                        </option>
-
-                    </select>
 
                 </div>
 
@@ -987,7 +811,7 @@
 
                 <div class="table-wrapper">
 
-                    <table id="expenseTable">
+                    <table class="expense-table">
 
                         <thead>
 
@@ -1018,34 +842,35 @@
                         </thead>
 
 
-                        <tbody>
+                        <tbody id="expenseTableBody">
 
                             {% for expense in expenses %}
 
                                 <tr>
 
                                     <td>
-
-                                        <span class="date-cell">
-                                            {{ expense.expense_date }}
+                                        <span class="date-text">
+                                            {{ expense["expense_date"] }}
                                         </span>
-
                                     </td>
 
 
                                     <td>
 
                                         <span
-                                            class="
-                                            category-badge
-                                            category-{{
-                                                expense.category|lower
-                                                |replace(' ', '-')
-                                            }}
-                                            "
+                                            class="category-badge category-{{ expense['category']|lower|replace(' ', '-') }}"
                                         >
+                                            {{ expense["category"] }}
+                                        </span>
 
-                                            {{ expense.category }}
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="description-text">
+
+                                            {{ expense["description"] or "No description" }}
 
                                         </span>
 
@@ -1054,33 +879,9 @@
 
                                     <td>
 
-                                        <div class="description-cell">
+                                        <strong class="amount-text">
 
-                                            <strong>
-
-                                                {{
-                                                    expense.description
-                                                    or "No description"
-                                                }}
-
-                                            </strong>
-
-                                        </div>
-
-                                    </td>
-
-
-                                    <td>
-
-                                        <strong class="amount-cell">
-
-                                            Rs.
-
-                                            {{
-                                                "%.2f"|format(
-                                                    expense.amount
-                                                )
-                                            }}
+                                            Rs. {{ "%.2f"|format(expense["amount"]) }}
 
                                         </strong>
 
@@ -1089,32 +890,32 @@
 
                                     <td>
 
-                                        <form
-                                            action="{{
-                                                url_for(
-                                                    'delete',
-                                                    expense_id=expense.id
-                                                )
-                                            }}"
-                                            method="POST"
-                                            class="delete-form"
-                                        >
+                                        <div class="action-buttons">
 
-                                            <button
-                                                type="submit"
-                                                class="delete-button"
-                                                onclick="
-                                                return confirm(
-                                                    'Are you sure you want to delete this expense?'
-                                                );
-                                                "
+                                            <a
+                                                href="{{ url_for('edit_expense', expense_id=expense['id']) }}"
+                                                class="edit-button"
+                                            >
+                                                Edit
+                                            </a>
+
+
+                                            <form
+                                                method="POST"
+                                                action="{{ url_for('delete', expense_id=expense['id']) }}"
+                                                onsubmit="return confirmDelete()"
                                             >
 
-                                                🗑
+                                                <button
+                                                    type="submit"
+                                                    class="delete-button"
+                                                >
+                                                    Delete
+                                                </button>
 
-                                            </button>
+                                            </form>
 
-                                        </form>
+                                        </div>
 
                                     </td>
 
@@ -1132,128 +933,346 @@
 
                 <div class="empty-state">
 
-                    <div class="empty-illustration">
-                        🧾
+                    <div class="empty-icon">
+                        💸
                     </div>
 
-
                     <h3>
-                        No transactions yet
+                        No expenses yet
                     </h3>
 
-
                     <p>
-                        Add your first expense above.
+                        Start tracking your spending by adding
+                        your first expense above.
                     </p>
+
+                    <a href="#add-expense">
+                        ＋ Add your first expense
+                    </a>
 
                 </div>
 
             {% endif %}
 
-        </section>
+        </div>
+
+    </section>
 
 
-        <!-- =================================================
-             HIGHEST EXPENSE
-             ================================================= -->
+    <!-- FOOTER -->
 
-        {% if highest_expense %}
+    <footer class="dashboard-footer">
 
-            <section class="insight-card">
+        <span>
+            © 2026 Expense Tracker
+        </span>
 
-                <div class="insight-icon">
-                    💡
-                </div>
+        <span>
+            Manage your money smarter.
+        </span>
 
-
-                <div>
-
-                    <span>
-                        Biggest Expense
-                    </span>
+    </footer>
 
 
-                    <h3>
-
-                        {{
-                            highest_expense.description
-                            or highest_expense.category
-                        }}
-
-                    </h3>
+</main>
 
 
-                    <p>
-
-                        {{ highest_expense.expense_date }}
-
-                        ·
-
-                        {{ highest_expense.category }}
-
-                    </p>
-
-                </div>
-
-
-                <strong>
-
-                    Rs.
-
-                    {{ "%.2f"|format(
-                        highest_expense.amount
-                    ) }}
-
-                </strong>
-
-            </section>
-
-        {% endif %}
-
-
-        <!-- FOOTER -->
-
-        <footer>
-
-            <strong>
-                Expense Tracker
-            </strong>
-
-            <span>
-                Built with Flask · SQLite · HTML · CSS · JavaScript
-            </span>
-
-        </footer>
-
-
-    </main>
-
-</div>
-
-
-<!-- =========================================================
-     CHART DATA
-     ========================================================= -->
+<!-- CHART DATA -->
 
 <script>
 
-    const categoryData =
-        {{ category_summary | tojson }};
+    const monthlyData = {{ monthly_trend | tojson }};
+
+    const categoryData = {{ category_summary | tojson }};
 
 
-    const monthlyData =
-        {{ monthly_trend | tojson }};
+    /* =========================================
+       MONTHLY CHART
+    ========================================= */
+
+    const monthlyCanvas =
+        document.getElementById("monthlyChart");
+
+
+    if (monthlyCanvas) {
+
+        new Chart(
+            monthlyCanvas,
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: monthlyData.map(
+                        item => item.month
+                    ),
+
+                    datasets: [
+
+                        {
+
+                            label: "Spending",
+
+                            data: monthlyData.map(
+                                item => item.total
+                            ),
+
+                            borderWidth: 3,
+
+                            tension: 0.4,
+
+                            fill: true,
+
+                            pointRadius: 4,
+
+                            pointHoverRadius: 6
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+
+                        legend: {
+                            display: false
+                        }
+
+                    },
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            ticks: {
+
+                                callback: function(value) {
+
+                                    return "Rs. " + value;
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================
+       CATEGORY CHART
+    ========================================= */
+
+    const categoryCanvas =
+        document.getElementById("categoryChart");
+
+
+    if (categoryCanvas) {
+
+        new Chart(
+            categoryCanvas,
+            {
+
+                type: "doughnut",
+
+                data: {
+
+                    labels: categoryData.map(
+                        item => item.category
+                    ),
+
+                    datasets: [
+
+                        {
+
+                            data: categoryData.map(
+                                item => item.total
+                            ),
+
+                            borderWidth: 3
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    cutout: "65%",
+
+                    plugins: {
+
+                        legend: {
+
+                            position: "bottom",
+
+                            labels: {
+
+                                padding: 15,
+
+                                usePointStyle: true
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================
+       SEARCH
+    ========================================= */
+
+    function filterExpenses() {
+
+        const searchInput =
+            document.getElementById("expenseSearch");
+
+        const search =
+            searchInput.value.toLowerCase();
+
+        const rows =
+            document.querySelectorAll(
+                "#expenseTableBody tr"
+            );
+
+
+        rows.forEach(function(row) {
+
+            const text =
+                row.textContent.toLowerCase();
+
+            if (text.includes(search)) {
+
+                row.style.display = "";
+
+            } else {
+
+                row.style.display = "none";
+
+            }
+
+        });
+
+    }
+
+
+    /* =========================================
+       DELETE CONFIRMATION
+    ========================================= */
+
+    function confirmDelete() {
+
+        return confirm(
+            "Are you sure you want to delete this expense?"
+        );
+
+    }
+
+
+    /* =========================================
+       DARK MODE
+    ========================================= */
+
+    function toggleDarkMode() {
+
+        document.body.classList.toggle("dark-mode");
+
+        const darkMode =
+            document.body.classList.contains(
+                "dark-mode"
+            );
+
+        localStorage.setItem(
+            "expenseTrackerDarkMode",
+            darkMode ? "enabled" : "disabled"
+        );
+
+    }
+
+
+    if (
+        localStorage.getItem(
+            "expenseTrackerDarkMode"
+        ) === "enabled"
+    ) {
+
+        document.body.classList.add(
+            "dark-mode"
+        );
+
+    }
+
+
+    /* =========================================
+       MOBILE SIDEBAR
+    ========================================= */
+
+    function toggleSidebar() {
+
+        const sidebar =
+            document.getElementById("sidebar");
+
+        sidebar.classList.toggle(
+            "mobile-open"
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(function(item) {
+
+            item.addEventListener(
+                "click",
+                function() {
+
+                    if (
+                        window.innerWidth <= 900
+                    ) {
+
+                        document
+                            .getElementById("sidebar")
+                            .classList.remove(
+                                "mobile-open"
+                            );
+
+                    }
+
+                }
+            );
+
+        });
 
 </script>
-
-
-<!-- JAVASCRIPT -->
-
-<script
-    src="{{ url_for('static', filename='js/script.js') }}"
-></script>
-
-
-</body>
-
-</html>
+</body> </html>
