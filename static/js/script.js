@@ -1,532 +1,661 @@
 document.addEventListener(
-    "DOMContentLoaded",
+"DOMContentLoaded",
+function () {
+
+ 
+    initializeTheme();
+
+    initializeSearch();
+
+    initializeNavigation();
+
+    initializeCharts();
+
+    initializePasswordValidation();
+
+}
+ 
+
+);
+
+function initializeTheme() {
+
+ 
+const themeToggle =
+    document.getElementById(
+        "themeToggle"
+    );
+
+
+const themeIcon =
+    document.getElementById(
+        "themeIcon"
+    );
+
+
+const themeText =
+    document.getElementById(
+        "themeText"
+    );
+
+
+const savedTheme =
+    localStorage.getItem(
+        "expenseTrackerTheme"
+    );
+
+
+if (savedTheme === "dark") {
+
+    document.body.classList.add(
+        "dark"
+    );
+
+}
+
+
+updateThemeButton();
+
+
+if (!themeToggle) {
+
+    return;
+
+}
+
+
+themeToggle.addEventListener(
+    "click",
     function () {
 
-        /* =========================
-           DARK MODE
-        ========================= */
+        document.body.classList.toggle(
+            "dark"
+        );
 
-        const themeToggle =
-            document.getElementById(
-                "themeToggle"
-            );
 
-        const themeIcon =
-            document.getElementById(
-                "themeIcon"
-            );
-
-        const savedTheme =
-            localStorage.getItem(
-                "expenseTheme"
-            );
-
-        if (savedTheme === "dark") {
-
-            document.body.classList.add(
+        const isDark =
+            document.body.classList.contains(
                 "dark"
             );
 
-            themeIcon.textContent = "☀️";
-        }
+
+        localStorage.setItem(
+            "expenseTrackerTheme",
+            isDark
+                ? "dark"
+                : "light"
+        );
 
 
-        if (themeToggle) {
+        updateThemeButton();
 
-            themeToggle.addEventListener(
-                "click",
-                function () {
-
-                    document.body.classList.toggle(
-                        "dark"
-                    );
-
-                    const isDark =
-                        document.body.classList.contains(
-                            "dark"
-                        );
-
-                    localStorage.setItem(
-                        "expenseTheme",
-                        isDark
-                            ? "dark"
-                            : "light"
-                    );
-
-                    themeIcon.textContent =
-                        isDark
-                            ? "☀️"
-                            : "🌙";
-
-                }
-            );
-
-        }
+    }
+);
 
 
-        /* =========================
-           SEARCH
-        ========================= */
+function updateThemeButton() {
 
-        const searchInput =
-            document.getElementById(
-                "searchInput"
-            );
-
-        const categoryFilter =
-            document.getElementById(
-                "categoryFilter"
-            );
-
-        const table =
-            document.getElementById(
-                "expenseTable"
-            );
+    const isDark =
+        document.body.classList.contains(
+            "dark"
+        );
 
 
-        function filterTransactions() {
+    if (themeIcon) {
 
-            if (!table) {
-                return;
+        themeIcon.textContent =
+            isDark
+                ? "☀️"
+                : "🌙";
+
+    }
+
+
+    if (themeText) {
+
+        themeText.textContent =
+            isDark
+                ? "Light Mode"
+                : "Dark Mode";
+
+    }
+
+}
+ 
+
+}
+
+function initializeSearch() {
+
+ 
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+
+const categoryFilter =
+    document.getElementById(
+        "categoryFilter"
+    );
+
+
+const dateFilter =
+    document.getElementById(
+        "dateFilter"
+    );
+
+
+const table =
+    document.getElementById(
+        "expenseTable"
+    );
+
+
+if (
+    !searchInput ||
+    !categoryFilter ||
+    !table
+) {
+
+    return;
+
+}
+
+
+function filterTable() {
+
+    const search =
+        searchInput.value
+            .toLowerCase()
+            .trim();
+
+
+    const category =
+        categoryFilter.value
+            .toLowerCase();
+
+
+    const selectedDate =
+        dateFilter
+            ? dateFilter.value
+            : "";
+
+
+    const rows =
+        table.querySelectorAll(
+            "tbody tr"
+        );
+
+
+    rows.forEach(
+        function (row) {
+
+            const description =
+                (
+                    row.dataset.description
+                    || ""
+                ).toLowerCase();
+
+
+            const rowCategory =
+                (
+                    row.dataset.category
+                    || ""
+                ).toLowerCase();
+
+
+            const rowDate =
+                row.dataset.date
+                || "";
+
+
+            const matchesSearch =
+                !search ||
+                description.includes(
+                    search
+                );
+
+
+            const matchesCategory =
+                !category ||
+                rowCategory === category;
+
+
+            const matchesDate =
+                !selectedDate ||
+                rowDate === selectedDate;
+
+
+            if (
+                matchesSearch &&
+                matchesCategory &&
+                matchesDate
+            ) {
+
+                row.style.display =
+                    "";
+
+            } else {
+
+                row.style.display =
+                    "none";
+
             }
 
-            const searchText =
-                searchInput
-                    ? searchInput.value
-                        .toLowerCase()
-                        .trim()
-                    : "";
-
-            const selectedCategory =
-                categoryFilter
-                    ? categoryFilter.value
-                    : "";
-
-            const rows =
-                table.querySelectorAll(
-                    "tbody tr"
-                );
-
-            rows.forEach(
-                function (row) {
-
-                    const rowText =
-                        row.textContent
-                            .toLowerCase();
-
-                    const categoryElement =
-                        row.querySelector(
-                            ".category-badge"
-                        );
-
-                    const rowCategory =
-                        categoryElement
-                            ? categoryElement.textContent.trim()
-                            : "";
-
-                    const matchesSearch =
-                        rowText.includes(
-                            searchText
-                        );
-
-                    const matchesCategory =
-                        !selectedCategory ||
-                        rowCategory ===
-                        selectedCategory;
-
-                    row.style.display =
-                        matchesSearch &&
-                        matchesCategory
-                            ? ""
-                            : "none";
-
-                }
-            );
         }
+    );
 
+}
 
-        if (searchInput) {
 
-            searchInput.addEventListener(
-                "input",
-                filterTransactions
-            );
+searchInput.addEventListener(
+    "input",
+    filterTable
+);
 
-        }
 
+categoryFilter.addEventListener(
+    "change",
+    filterTable
+);
 
-        if (categoryFilter) {
 
-            categoryFilter.addEventListener(
-                "change",
-                filterTransactions
-            );
+if (dateFilter) {
 
-        }
+    dateFilter.addEventListener(
+        "change",
+        filterTable
+    );
 
+}
+ 
 
-        /* =========================
-           FORM VALIDATION
-        ========================= */
+}
 
-        const expenseForm =
-            document.querySelector(
-                ".expense-form"
-            );
+function initializeNavigation() {
 
-        if (expenseForm) {
+ 
+const links =
+    document.querySelectorAll(
+        ".nav-link"
+    );
 
-            expenseForm.addEventListener(
-                "submit",
-                function (event) {
 
-                    const amount =
-                        document.getElementById(
-                            "amount"
-                        ).value;
+if (!links.length) {
 
-                    const category =
-                        document.getElementById(
-                            "category"
-                        ).value;
+    return;
 
-                    if (
-                        !amount ||
-                        Number(amount) <= 0
-                    ) {
+}
 
-                        event.preventDefault();
 
-                        alert(
-                            "Please enter a valid amount."
-                        );
+links.forEach(
+    function (link) {
 
-                        return;
-                    }
-
-                    if (!category) {
-
-                        event.preventDefault();
-
-                        alert(
-                            "Please select a category."
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        /* =========================
-           SMOOTH NAVIGATION
-        ========================= */
-
-        document
-            .querySelectorAll(
-                '.nav-link[href^="#"]'
-            )
-            .forEach(
-                function (link) {
-
-                    link.addEventListener(
-                        "click",
-                        function (event) {
-
-                            const targetId =
-                                this.getAttribute(
-                                    "href"
-                                );
-
-                            const target =
-                                document.querySelector(
-                                    targetId
-                                );
-
-                            if (target) {
-
-                                event.preventDefault();
-
-                                target.scrollIntoView(
-                                    {
-                                        behavior: "smooth"
-                                    }
-                                );
-
-                            }
-
-                        }
-                    );
-
-                }
-            );
-
-
-        /* =========================
-           MONTHLY CHART
-        ========================= */
-
-        const monthlyCanvas =
-            document.getElementById(
-                "monthlyChart"
-            );
-
-
-        if (
-            monthlyCanvas &&
-            typeof Chart !== "undefined"
-        ) {
-
-            const labels =
-                monthlyData.map(
-                    function (item) {
-
-                        return item.month;
-
-                    }
-                );
-
-            const values =
-                monthlyData.map(
-                    function (item) {
-
-                        return item.total;
-
-                    }
-                );
-
-
-            new Chart(
-                monthlyCanvas,
-                {
-                    type: "line",
-
-                    data: {
-
-                        labels: labels,
-
-                        datasets: [
-                            {
-                                label:
-                                    "Spending",
-
-                                data: values,
-
-                                borderColor:
-                                    "#2563eb",
-
-                                backgroundColor:
-                                    "rgba(37, 99, 235, 0.10)",
-
-                                borderWidth: 3,
-
-                                fill: true,
-
-                                tension: 0.4,
-
-                                pointRadius: 4,
-
-                                pointHoverRadius: 6
-                            }
-                        ]
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: false,
-
-                        plugins: {
-
-                            legend: {
-                                display: false
-                            }
-
-                        },
-
-                        scales: {
-
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            },
-
-                            y: {
-
-                                beginAtZero: true,
-
-                                grid: {
-                                    color:
-                                        "rgba(148, 163, 184, 0.15)"
-                                },
-
-                                ticks: {
-
-                                    callback:
-                                        function (
-                                            value
-                                        ) {
-
-                                            return "Rs. " +
-                                                value;
-
-                                        }
-
-                                }
-
-                            }
-
-                        }
-                    }
-                }
-            );
-
-        }
-
-
-        /* =========================
-           CATEGORY CHART
-        ========================= */
-
-        const categoryCanvas =
-            document.getElementById(
-                "categoryChart"
-            );
-
-
-        if (
-            categoryCanvas &&
-            typeof Chart !== "undefined"
-        ) {
-
-            const labels =
-                categoryData.map(
-                    function (item) {
-
-                        return item.category;
-
-                    }
-                );
-
-            const values =
-                categoryData.map(
-                    function (item) {
-
-                        return item.total;
-
-                    }
-                );
-
-
-            new Chart(
-                categoryCanvas,
-                {
-                    type: "doughnut",
-
-                    data: {
-
-                        labels: labels,
-
-                        datasets: [
-                            {
-                                data: values,
-
-                                backgroundColor: [
-                                    "#2563eb",
-                                    "#7c3aed",
-                                    "#16a34a",
-                                    "#ea580c",
-                                    "#db2777",
-                                    "#0891b2",
-                                    "#dc2626",
-                                    "#64748b"
-                                ],
-
-                                borderWidth: 0,
-
-                                hoverOffset: 8
-                            }
-                        ]
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: false,
-
-                        cutout: "68%",
-
-                        plugins: {
-
-                            legend: {
-
-                                position: "bottom",
-
-                                labels: {
-
-                                    usePointStyle: true,
-
-                                    padding: 15,
-
-                                    font: {
-                                        size: 10
-                                    }
-
-                                }
-
-                            }
-
-                        }
-                    }
-                }
-            );
-
-        }
-
-
-        /* =========================
-           AUTO HIDE NOTIFICATIONS
-        ========================= */
-
-        setTimeout(
+        link.addEventListener(
+            "click",
             function () {
 
-                document
-                    .querySelectorAll(
-                        ".notification"
-                    )
-                    .forEach(
-                        function (notification) {
+                links.forEach(
+                    function (item) {
 
-                            notification.style.opacity =
-                                "0";
+                        item.classList.remove(
+                            "active"
+                        );
 
-                            notification.style.transform =
-                                "translateY(-5px)";
+                    }
+                );
 
-                            notification.style.transition =
-                                "0.4s";
 
-                            setTimeout(
-                                function () {
+                link.classList.add(
+                    "active"
+                );
 
-                                    notification.remove();
-
-                                },
-                                400
-                            );
-
-                        }
-                    );
-
-            },
-            4000
+            }
         );
 
     }
 );
+ 
+
+}
+
+function initializeCharts() {
+
+ 
+if (
+    typeof Chart ===
+    "undefined"
+) {
+
+    return;
+
+}
+
+
+createMonthlyChart();
+
+createCategoryChart();
+ 
+
+}
+
+function createMonthlyChart() {
+
+ 
+const canvas =
+    document.getElementById(
+        "monthlyChart"
+    );
+
+
+if (
+    !canvas ||
+    typeof monthlyData ===
+    "undefined"
+) {
+
+    return;
+
+}
+
+
+const labels =
+    monthlyData.map(
+        function (item) {
+
+            return formatMonth(
+                item.month
+            );
+
+        }
+    );
+
+
+const values =
+    monthlyData.map(
+        function (item) {
+
+            return item.total;
+
+        }
+    );
+
+
+new Chart(
+    canvas,
+    {
+        type: "line",
+
+        data: {
+
+            labels: labels,
+
+            datasets: [
+                {
+                    label:
+                        "Monthly Spending",
+
+                    data: values,
+
+                    borderWidth: 3,
+
+                    tension: 0.35,
+
+                    fill: false,
+
+                    pointRadius: 4,
+
+                    pointHoverRadius: 6
+                }
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio:
+                false,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            },
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+
+                        callback:
+                            function (value) {
+
+                                return "Rs. "
+                                    + value;
+
+                            }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+);
+ 
+
+}
+
+function createCategoryChart() {
+
+ 
+const canvas =
+    document.getElementById(
+        "categoryChart"
+    );
+
+
+if (
+    !canvas ||
+    typeof categoryData ===
+    "undefined" ||
+    !categoryData.length
+) {
+
+    return;
+
+}
+
+
+const labels =
+    categoryData.map(
+        function (item) {
+
+            return item.category;
+
+        }
+    );
+
+
+const values =
+    categoryData.map(
+        function (item) {
+
+            return item.total;
+
+        }
+    );
+
+
+new Chart(
+    canvas,
+    {
+        type: "doughnut",
+
+        data: {
+
+            labels: labels,
+
+            datasets: [
+                {
+                    data: values,
+
+                    borderWidth: 2
+                }
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio:
+                false,
+
+            plugins: {
+
+                legend: {
+
+                    position: "bottom",
+
+                    labels: {
+
+                        padding: 12,
+
+                        font: {
+                            size: 11
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+);
+ 
+
+}
+
+function formatMonth(
+monthString
+) {
+
+ 
+if (
+    !monthString ||
+    monthString.length !== 7
+) {
+
+    return monthString;
+
+}
+
+
+const parts =
+    monthString.split("-");
+
+
+const year =
+    parts[0];
+
+
+const month =
+    parseInt(
+        parts[1],
+        10
+    );
+
+
+const names = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+];
+
+
+return (
+    names[month - 1]
+    + " "
+    + year
+);
+ 
+
+}
+
+function initializePasswordValidation() {
+
+ 
+const registerForm =
+    document.querySelector(
+        'form[action*="register"]'
+    );
+
+
+if (!registerForm) {
+
+    return;
+
+}
+
+
+registerForm.addEventListener(
+    "submit",
+    function (event) {
+
+        const password =
+            document.getElementById(
+                "password"
+            );
+
+
+        const confirmPassword =
+            document.getElementById(
+                "confirm_password"
+            );
+
+
+        if (
+            password &&
+            confirmPassword &&
+            password.value !==
+            confirmPassword.value
+        ) {
+
+            event.preventDefault();
+
+            alert(
+                "Passwords do not match."
+            );
+
+        }
+
+    }
+);
+ 
+
+}
