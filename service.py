@@ -1,298 +1,344 @@
-
 from datetime import date, datetime
 
-from database import (
-    get_connection,
-    initialize_database,
-)
-
+from database import get_connection, initialize_database
 
 def add_expense(
-    user_id,
-    amount,
-    category,
-    description="",
-    expense_date=None,
+user_id,
+amount,
+category,
+description="",
+expense_date=None
 ):
-    initialize_database()
+initialize_database()
 
-    try:
-        amount = float(amount)
+try:
+    amount = float(amount)
+except (TypeError, ValueError):
+    raise ValueError("Amount must be a valid number.")
 
-    except (TypeError, ValueError):
-        raise ValueError(
-            "Amount must be a valid number."
-        )
+if amount <= 0:
+    raise ValueError("Amount must be greater than zero.")
 
-    if amount <= 0:
-        raise ValueError(
-            "Amount must be greater than zero."
-        )
+category = str(category).strip()
 
-    category = str(category).strip()
+if not category:
+    raise ValueError("Category cannot be empty.")
 
-    if not category:
-        raise ValueError(
-            "Category cannot be empty."
-        )
+if expense_date is None:
+    expense_date = date.today().isoformat()
 
-    if expense_date is None:
-        expense_date = date.today().isoformat()
+try:
+    datetime.strptime(expense_date, "%Y-%m-%d")
+except ValueError:
+    raise ValueError("Date must be in YYYY-MM-DD format.")
 
-    try:
-        datetime.strptime(
-            expense_date,
-            "%Y-%m-%d"
-        )
+connection = get_connection()
 
-    except ValueError:
-        raise ValueError(
-            "Date must be in YYYY-MM-DD format."
-        )
-
-    connection = get_connection()
-
-    cursor = connection.execute(
-        """
-        INSERT INTO expenses (
-            user_id,
-            amount,
-            category,
-            description,
-            expense_date
-        )
-        VALUES (?, ?, ?, ?, ?)
-        """,
-        (
-            user_id,
-            amount,
-            category,
-            str(description).strip(),
-            expense_date,
-        ),
+cursor = connection.execute(
+    """
+    INSERT INTO expenses (
+        user_id,
+        amount,
+        category,
+        description,
+        expense_date
     )
+    VALUES (?, ?, ?, ?, ?)
+    """,
+    (
+        user_id,
+        amount,
+        category,
+        str(description).strip(),
+        expense_date
+    )
+)
 
-    connection.commit()
+connection.commit()
 
-    expense_id = cursor.lastrowid
+expense_id = cursor.lastrowid
 
-    connection.close()
+connection.close()
 
-    return expense_id
-
+return expense_id
 
 def list_expenses(user_id):
-    initialize_database()
+initialize_database()
 
-    connection = get_connection()
+connection = get_connection()
 
-    rows = connection.execute(
-        """
-        SELECT *
-        FROM expenses
-        WHERE user_id = ?
-        ORDER BY expense_date DESC, id DESC
-        """,
-        (user_id,),
-    ).fetchall()
+rows = connection.execute(
+    """
+    SELECT *
+    FROM expenses
+    WHERE user_id = ?
+    ORDER BY expense_date DESC, id DESC
+    """,
+    (user_id,)
+).fetchall()
 
-    connection.close()
+connection.close()
 
-    return [dict(row) for row in rows]
+return [dict(row) for row in rows]
+
+def get_expense(user_id, expense_id):
+initialize_database()
+
+connection = get_connection()
+
+row = connection.execute(
+    """
+    SELECT *
+    FROM expenses
+    WHERE id = ?
+    AND user_id = ?
+    """,
+    (
+        expense_id,
+        user_id
+    )
+).fetchone()
+
+connection.close()
+
+if row:
+    return dict(row)
+
+return None
 
 
-def get_monthly_summary(
-    user_id,
-    year,
-    month,
+def update_expense(
+user_id,
+expense_id,
+amount,
+category,
+description,
+expense_date
 ):
-    initialize_database()
+initialize_database()
 
-    date_prefix = (
-        f"{year:04d}-{month:02d}%"
+
+try:
+    amount = float(amount)
+except (TypeError, ValueError):
+    raise ValueError("Amount must be a valid number.")
+
+if amount <= 0:
+    raise ValueError("Amount must be greater than zero.")
+
+category = str(category).strip()
+
+if not category:
+    raise ValueError("Category cannot be empty.")
+
+try:
+    datetime.strptime(
+        expense_date,
+        "%Y-%m-%d"
+    )
+except ValueError:
+    raise ValueError(
+        "Date must be in YYYY-MM-DD format."
     )
 
-    connection = get_connection()
+connection = get_connection()
 
-    total = connection.execute(
-        """
-        SELECT COALESCE(SUM(amount), 0)
-        FROM expenses
-        WHERE user_id = ?
-        AND expense_date LIKE ?
-        """,
-        (
-            user_id,
-            date_prefix,
-        ),
-    ).fetchone()[0]
+cursor = connection.execute(
+    """
+    UPDATE expenses
+    SET
+        amount = ?,
+        category = ?,
+        description = ?,
+        expense_date = ?
+    WHERE id = ?
+    AND user_id = ?
+    """,
+    (
+        amount,
+        category,
+        str(description).strip(),
+        expense_date,
+        expense_id,
+        user_id
+    )
+)
 
-    categories = connection.execute(
-        """
-        SELECT
-            category,
-            SUM(amount) AS total
-        FROM expenses
-        WHERE user_id = ?
-        AND expense_date LIKE ?
-        GROUP BY category
-        ORDER BY total DESC
-        """,
-        (
-            user_id,
-            date_prefix,
-        ),
-    ).fetchall()
+connection.commit()
 
-    connection.close()
+updated = cursor.rowcount > 0
 
-    return total, [
-        dict(row)
-        for row in categories
-    ]
+connection.close()
+
+return updated
+
+
+def delete_expense(user_id, expense_id):
+initialize_database()
+
+
+connection = get_connection()
+
+cursor = connection.execute(
+    """
+    DELETE FROM expenses
+    WHERE id = ?
+    AND user_id = ?
+    """,
+    (
+        expense_id,
+        user_id
+    )
+)
+
+connection.commit()
+
+deleted = cursor.rowcount > 0
+
+connection.close()
+
+return deleted
+
+
+def get_monthly_summary(user_id, year, month):
+initialize_database()
+
+date_prefix = f"{year:04d}-{month:02d}%"
+
+connection = get_connection()
+
+total = connection.execute(
+    """
+    SELECT COALESCE(SUM(amount), 0)
+    FROM expenses
+    WHERE user_id = ?
+    AND expense_date LIKE ?
+    """,
+    (
+        user_id,
+        date_prefix
+    )
+).fetchone()[0]
+
+categories = connection.execute(
+    """
+    SELECT
+        category,
+        SUM(amount) AS total
+    FROM expenses
+    WHERE user_id = ?
+    AND expense_date LIKE ?
+    GROUP BY category
+    ORDER BY total DESC
+    """,
+    (
+        user_id,
+        date_prefix
+    )
+).fetchall()
+
+connection.close()
+
+return total, [dict(row) for row in categories]
 
 
 def get_category_summary(user_id):
-    initialize_database()
-
-    connection = get_connection()
-
-    rows = connection.execute(
-        """
-        SELECT
-            category,
-            SUM(amount) AS total
-        FROM expenses
-        WHERE user_id = ?
-        GROUP BY category
-        ORDER BY total DESC
-        """,
-        (user_id,),
-    ).fetchall()
-
-    connection.close()
-
-    return [dict(row) for row in rows]
+initialize_database()
 
 
-def get_monthly_trend(
-    user_id,
-    months=6,
-):
-    initialize_database()
+connection = get_connection()
 
-    connection = get_connection()
+rows = connection.execute(
+    """
+    SELECT
+        category,
+        SUM(amount) AS total
+    FROM expenses
+    WHERE user_id = ?
+    GROUP BY category
+    ORDER BY total DESC
+    """,
+    (user_id,)
+).fetchall()
 
-    rows = connection.execute(
-        """
-        SELECT
-            substr(expense_date, 1, 7)
-                AS month,
+connection.close()
 
-            COALESCE(SUM(amount), 0)
-                AS total
+return [dict(row) for row in rows]
 
-        FROM expenses
 
-        WHERE user_id = ?
+def get_monthly_trend(user_id, months=6):
+initialize_database()
 
-        GROUP BY substr(
-            expense_date,
-            1,
-            7
-        )
 
-        ORDER BY month DESC
+connection = get_connection()
 
-        LIMIT ?
-        """,
-        (
-            user_id,
-            months,
-        ),
-    ).fetchall()
+rows = connection.execute(
+    """
+    SELECT
+        substr(expense_date, 1, 7) AS month,
+        COALESCE(SUM(amount), 0) AS total
+    FROM expenses
+    WHERE user_id = ?
+    GROUP BY substr(expense_date, 1, 7)
+    ORDER BY month DESC
+    LIMIT ?
+    """,
+    (
+        user_id,
+        months
+    )
+).fetchall()
 
-    connection.close()
+connection.close()
 
-    results = [
-        dict(row)
-        for row in rows
-    ]
+results = [dict(row) for row in rows]
 
-    results.reverse()
+results.reverse()
 
-    return results
+return results
 
 
 def get_average_expense(user_id):
-    initialize_database()
+initialize_database()
 
-    connection = get_connection()
 
-    result = connection.execute(
-        """
-        SELECT COALESCE(AVG(amount), 0)
-        FROM expenses
-        WHERE user_id = ?
-        """,
-        (user_id,),
-    ).fetchone()[0]
+connection = get_connection()
 
-    connection.close()
+result = connection.execute(
+    """
+    SELECT COALESCE(AVG(amount), 0)
+    FROM expenses
+    WHERE user_id = ?
+    """,
+    (user_id,)
+).fetchone()[0]
 
-    return result
+connection.close()
+
+return result
 
 
 def get_highest_expense(user_id):
-    initialize_database()
-
-    connection = get_connection()
-
-    row = connection.execute(
-        """
-        SELECT *
-        FROM expenses
-        WHERE user_id = ?
-        ORDER BY amount DESC
-        LIMIT 1
-        """,
-        (user_id,),
-    ).fetchone()
-
-    connection.close()
-
-    return (
-        dict(row)
-        if row
-        else None
-    )
+initialize_database()
 
 
-def delete_expense(
-    user_id,
-    expense_id,
-):
-    initialize_database()
+connection = get_connection()
 
-    connection = get_connection()
+row = connection.execute(
+    """
+    SELECT *
+    FROM expenses
+    WHERE user_id = ?
+    ORDER BY amount DESC
+    LIMIT 1
+    """,
+    (user_id,)
+).fetchone()
 
-    cursor = connection.execute(
-        """
-        DELETE FROM expenses
-        WHERE id = ?
-        AND user_id = ?
-        """,
-        (
-            expense_id,
-            user_id,
-        ),
-    )
+connection.close()
 
-    connection.commit()
+if row:
+    return dict(row)
 
-    deleted = cursor.rowcount > 0
-
-    connection.close()
-
-    return deleted
+return None
 
